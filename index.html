@@ -4,85 +4,159 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>尋影 TraceBack</title>
+  <meta name="description" content="你的臉被拿去打詐騙廣告或假代言時，幫你確認來源、留下證據，準備好檢舉與報案要用的資料。">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14 10h4M14 13.5h4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5m0 0-4 4m4-4 4 4M5 19h14"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 19h18L12 4Z"/><path d="M12 10v4m0 3v.01"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7m0 3v.01"/></symbol>
+  </svg>
+
   <header class="top">
-    <div class="brand">
+    <button type="button" class="brand" id="home-link" aria-label="尋影 TraceBack，回到首頁">
+      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
       <strong>尋影 TraceBack</strong>
       <span class="tag">原型</span>
-    </div>
-    <button type="button" class="help-btn" id="help-open">需要協助</button>
+    </button>
+    <button type="button" class="help-btn" id="help-open"><svg class="icon"><use href="#i-help"/></svg>需要協助</button>
   </header>
 
-  <p class="privacy">你的照片與證據只在這台裝置的瀏覽器裡處理，不會上傳。比對用的模型檔會從公開的檔案伺服器下載。</p>
+  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>你的照片和證據只留在這台裝置上，不會上傳到任何地方。</span></p>
 
-  <ol class="steps" id="steps" aria-label="流程">
-    <li data-step="bind">確認本人</li>
-    <li data-step="library">參考照片</li>
-    <li data-step="case">可疑內容</li>
-    <li data-step="result">比對</li>
-    <li data-step="evidence">存證</li>
-    <li data-step="action">行動</li>
-  </ol>
+  <div class="progress" id="progress" hidden>
+    <div class="progress-text"><span id="progress-count"></span><strong id="progress-name"></strong></div>
+    <div class="bar" role="presentation"><span id="progress-bar"></span></div>
+  </div>
 
   <div class="status" id="status" role="status" aria-live="polite" hidden></div>
 
   <main>
     <!-- 首頁 -->
     <section id="home" class="view">
-      <h1>你的臉被拿去用了嗎？</h1>
-      <p class="lead">有人用你的照片打詐騙廣告、假代言，或改造成其他內容時，這裡可以幫你比對出被盜用的原圖、保全證據，並整理好檢舉、通報與報案要用的資料。</p>
+      <div class="hero">
+        <div>
+          <h1>發現自己的臉被拿去用了？<br>別慌，我們一步一步來。</h1>
+          <p class="lead">不管是詐騙廣告、假代言，還是被改造過的照片，這裡幫你確認它是不是從你的照片來的、把證據留下來，並準備好檢舉和報案要用的文字。</p>
+          <ul class="chips">
+            <li><svg class="icon"><use href="#i-lock"/></svg>照片不離開你的裝置</li>
+            <li><svg class="icon"><use href="#i-clock"/></svg>大約十分鐘</li>
+            <li><svg class="icon"><use href="#i-heart"/></svg>免費，不用註冊</li>
+          </ul>
+        </div>
+        <svg class="hero-art" viewBox="0 0 200 200" role="img" aria-label="一張照片被放大鏡檢視">
+          <circle cx="100" cy="100" r="92" fill="#fce8dd"/>
+          <rect x="42" y="38" width="96" height="116" rx="12" fill="#fff" stroke="#eab79f" stroke-width="3" transform="rotate(-6 90 96)"/>
+          <g transform="rotate(-6 90 96)">
+            <rect x="52" y="48" width="76" height="76" rx="8" fill="#ffe9c9"/>
+            <circle cx="90" cy="80" r="15" fill="#e9a27c"/>
+            <path d="M62 124c3-17 14-24 28-24s25 7 28 24Z" fill="#bc4b24"/>
+            <rect x="58" y="134" width="46" height="6" rx="3" fill="#eadfcf"/>
+          </g>
+          <circle cx="132" cy="126" r="27" fill="#fff" fill-opacity="0.75" stroke="#33291f" stroke-width="6"/>
+          <path d="m152 147 20 21" stroke="#33291f" stroke-width="9" stroke-linecap="round"/>
+          <path d="m121 126 8 8 14-16" fill="none" stroke="#2a7556" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
       <div class="paths">
         <article class="card">
-          <h2>我已經看到那則內容</h2>
-          <p>你手上有截圖或連結。上傳後，系統會找出它來自你的哪張照片、哪裡被改過。</p>
-          <button type="button" class="primary" id="start-path1">開始</button>
+          <span class="badge"><svg class="icon"><use href="#i-eye"/></svg></span>
+          <h2>我已經看到那則內容了</h2>
+          <p>手上有截圖或連結。上傳之後，我們幫你找出它用了你的哪張照片、哪裡被改過。</p>
+          <button type="button" class="primary" id="start-known">從這裡開始</button>
         </article>
-        <article class="card muted">
-          <h2>幫我找找看 <span class="tag">下一版</span></h2>
-          <p>從你的照片出發，搜尋公開的廣告與貼文。這個功能需要身分證驗證，目前尚未開放。</p>
-          <button type="button" disabled>尚未開放</button>
+        <article class="card">
+          <span class="badge"><svg class="icon"><use href="#i-search"/></svg></span>
+          <h2>我想知道有沒有人在用我的照片</h2>
+          <p>還沒看到，但擔心被盜用。從你的照片出發，幫你找找看。需要多一道證件驗證。</p>
+          <button type="button" class="primary" id="start-find">幫我找找看</button>
         </article>
       </div>
-      <p class="note">這是競賽用的原型，提供的是一般資訊與文件草稿，不是法律意見，也不能取代律師。</p>
-      <p class="note">開發用：<a href="experiment.html">比對實驗頁</a>，批次測試四層比對的認回率與誤判率。</p>
+
+      <h2>會做哪些事</h2>
+      <ol class="how">
+        <li><strong>確認是你本人</strong><span>拍一張自拍，確保只有你能查自己的照片。</span></li>
+        <li><strong>比對照片</strong><span>找出可疑內容用了你的哪張照片，標出被改過的地方。</span></li>
+        <li><strong>留下證據</strong><span>記下時間、來源和檔案的數位指紋，存成一份報告。</span></li>
+        <li><strong>告訴你下一步</strong><span>檢舉、通報、報案怎麼做，文字都先幫你寫好。</span></li>
+      </ol>
+
+      <h2>常見問題</h2>
+      <div class="faq">
+        <details>
+          <summary>我的照片會被傳到哪裡嗎？</summary>
+          <p>不會。所有比對都在你這台裝置的瀏覽器裡完成，這個網站沒有伺服器可以接收照片。唯一會從網路下載的，是比對用的模型檔。關掉頁面後，這次的資料就消失了。</p>
+        </details>
+        <details>
+          <summary>這能代替律師或報案嗎？</summary>
+          <p>不能。這裡提供的是一般資訊和文件草稿，不是法律意見。它的用處是讓你在找平台、警察或律師之前，先把證據和說明準備好。</p>
+        </details>
+        <details>
+          <summary>如果比對不出來怎麼辦？</summary>
+          <p>你還是可以把那則內容存證，照樣檢舉和報案。比對結果只是輔助，最後以你自己的確認為準。</p>
+        </details>
+        <details>
+          <summary>我現在很慌，可以找誰？</summary>
+          <p>詐騙相關可以打 165，遇到不雅影像可以打 113，社工會陪你處理。右上角的「需要協助」隨時可以打開。</p>
+        </details>
+      </div>
+
+      <p class="note">這是競賽用的原型。開發用：<a href="experiment.html">比對實驗頁</a></p>
     </section>
 
-    <!-- 步驟一：確認本人 -->
+    <!-- 確認本人 -->
     <section id="bind" class="view" hidden>
       <h1>先確認是你本人</h1>
-      <p class="lead">系統只讓你比對自己的照片。請用鏡頭拍一張自拍，接下來加入的每張參考照都必須是同一張臉。</p>
-      <label class="field">
-        <span>你對外使用的名稱（會放進文件草稿，可留白）</span>
-        <input type="text" id="display-name" autocomplete="off" maxlength="40">
-      </label>
+      <p class="lead">請拍一張自拍。這樣可以確保只有你能查自己的照片，別人沒辦法拿你的照片來用這個工具。</p>
       <div class="camera">
         <video id="video" playsinline muted hidden></video>
         <canvas id="selfie-preview" hidden></canvas>
       </div>
       <div class="row">
-        <button type="button" class="primary" id="camera-start">開啟鏡頭</button>
-        <button type="button" class="primary" id="camera-shot" hidden>拍照</button>
+        <button type="button" class="primary" id="camera-start"><svg class="icon"><use href="#i-camera"/></svg>開啟鏡頭拍一張</button>
+        <button type="button" class="primary" id="camera-shot" hidden><svg class="icon"><use href="#i-camera"/></svg>拍照</button>
         <label class="file-btn">
           改用上傳自拍照
-          <input type="file" id="selfie-file" accept="image/*" hidden>
+          <input type="file" class="vh" id="selfie-file" accept="image/*">
         </label>
       </div>
-      <p class="note">原型的限制：這裡只擷取即時畫面，沒有防偽檢測；上傳自拍照只供展示使用。自拍只用來算出臉部特徵，不會保存影像。</p>
       <p class="result-line" id="bind-result"></p>
+      <label class="field">
+        <span>別人怎麼稱呼你？（會放進之後的文件草稿，可以先不填）</span>
+        <input type="text" id="display-name" autocomplete="off" maxlength="40" placeholder="例如你的本名、藝名或頻道名稱">
+      </label>
+      <p class="note">自拍只用來算出臉部特徵，不會保存影像。原型的限制：目前沒有防偽檢測，上傳自拍照只供展示使用。</p>
       <div class="row end">
+        <button type="button" id="bind-back">回首頁</button>
         <button type="button" class="primary" id="bind-next" disabled>下一步</button>
       </div>
     </section>
 
-    <!-- 步驟二：參考照片 -->
+    <!-- 參考照片 -->
     <section id="library" class="view" hidden>
       <h1>加入你的照片</h1>
-      <p class="lead">選擇你公開發布過、可能被拿去用的照片。影片可以先截圖再加入。照片裡的臉必須與剛才的自拍相符。</p>
-      <label class="file-btn primary">
-        選擇照片
-        <input type="file" id="ref-files" accept="image/*" multiple hidden>
+      <p class="lead">選幾張你公開用過、最可能被別人拿走的照片。我們會拿這些照片去比對。</p>
+      <ul class="tips">
+        <li>大頭貼、宣傳照、常被轉貼的照片最適合。</li>
+        <li>影片可以先截圖再加入。</li>
+        <li>照片裡的臉要和剛才的自拍是同一個人，否則不會被加入。</li>
+      </ul>
+      <label class="drop" id="ref-drop">
+        <svg class="icon"><use href="#i-upload"/></svg>
+        <strong>點這裡選照片，或把照片拖進來</strong>
+        <span>可以一次選很多張</span>
+        <input type="file" class="vh" id="ref-files" accept="image/*" multiple>
       </label>
       <ul class="thumbs" id="ref-list"></ul>
       <div class="row end">
@@ -91,53 +165,160 @@
       </div>
     </section>
 
-    <!-- 步驟三：可疑內容 -->
+    <!-- 證件驗證（路徑二） -->
+    <section id="idcheck" class="view" hidden>
+      <h1>多一道確認：身分證件</h1>
+      <p class="lead">「幫我找找看」會主動去搜尋，所以要多確認一次你是本人。請拍下或上傳身分證正面，系統會比對證件上的照片和剛才的自拍。</p>
+      <label class="drop" id="id-drop">
+        <svg class="icon"><use href="#i-id"/></svg>
+        <strong>點這裡上傳身分證正面</strong>
+        <span>只在你的裝置上比對，比對完立刻丟棄，不保存、不上傳</span>
+        <input type="file" class="vh" id="id-file" accept="image/*">
+      </label>
+      <p class="result-line" id="id-result"></p>
+      <fieldset class="choices">
+        <legend>請確認兩件事</legend>
+        <div class="choice-grid">
+          <label class="choice"><input type="checkbox" id="id-consent-self"><span class="mark"></span><span class="body"><strong>我要找的是我自己的照片</strong><small>不是替別人找，也不是找別人。</small></span></label>
+          <label class="choice"><input type="checkbox" id="id-consent-use"><span class="mark"></span><span class="body"><strong>找到的結果只用來保護自己</strong><small>例如檢舉、通報、報案或澄清。</small></span></label>
+        </div>
+      </fieldset>
+      <p class="note">原型的限制：這裡只比對證件上的臉，不會讀取證件文字，也無法判斷證件真偽。正式版會改接政府或金融等級的身分驗證。</p>
+      <p><button type="button" class="link" id="id-skip">手邊沒有證件？先用示範模式看看</button></p>
+      <div class="row end">
+        <button type="button" id="id-back">上一步</button>
+        <button type="button" class="primary" id="id-next" disabled>下一步</button>
+      </div>
+    </section>
+
+    <!-- 搜尋（路徑二） -->
+    <section id="search" class="view" hidden>
+      <h1>幫你找找看</h1>
+      <p class="lead">系統會一頁一頁看網頁上的圖片，和你的照片比對。它會先看最可能出現冒用廣告的頁面。</p>
+
+      <fieldset class="choices" id="search-mode">
+        <legend>要在哪裡找？</legend>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="search-mode" value="demo" checked><span class="mark"></span><span class="body"><strong>示範：在模擬的網路上找</strong><small>用你的照片做出幾則模擬假廣告，混進十幾個模擬網頁裡，看系統找不找得到。不會連到真實網站。</small></span></label>
+          <label class="choice"><input type="radio" name="search-mode" value="scan"><span class="mark"></span><span class="body"><strong>掃描我指定的網頁</strong><small>貼上一個網址，系統會檢查那一頁和它連出去的同站網頁。</small></span></label>
+        </div>
+      </fieldset>
+
+      <div id="search-scan-box" hidden>
+        <p class="result-line bad" id="scan-locked" hidden>掃描真實網頁需要先通過證件驗證。你目前在示範模式，可以回上一步補上證件。</p>
+        <div class="grid">
+          <label class="field">
+            <span>網址</span>
+            <input type="url" id="scan-url" placeholder="https://" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>看多少頁</span>
+            <select id="scan-depth">
+              <option value="1">只看這一頁</option>
+              <option value="8" selected>這一頁加上連出去的頁面，最多 8 頁</option>
+              <option value="15">最多 15 頁</option>
+            </select>
+          </label>
+        </div>
+        <p class="note">原型的限制：瀏覽器不能直接讀取別的網站，目前只能掃描這個網站自己的頁面，例如<button type="button" class="link" id="scan-example">內建的測試站</button>。要掃描外部網站，需要先部署 <code>proxy/worker.js</code> 並在 <code>js/config.js</code> 填上位址。</p>
+      </div>
+
+      <div class="row">
+        <button type="button" class="primary" id="search-start"><svg class="icon"><use href="#i-search"/></svg>開始找</button>
+        <button type="button" id="search-stop" hidden>停止</button>
+      </div>
+
+      <div id="search-progress" hidden>
+        <div class="stats" id="search-stats"></div>
+        <p id="search-summary"></p>
+
+        <div id="hits-wrap" hidden>
+          <h2>找到的內容</h2>
+          <p class="note">請你自己看一眼，確認是不是你的照片。你的回答會讓系統下次更懂得先看哪些頁面。</p>
+          <ul class="hits" id="hits"></ul>
+        </div>
+
+        <details class="more" id="crawl-details" open>
+          <summary>系統看了哪些頁面</summary>
+          <div class="inner">
+            <p class="note">每一頁前面的數字是「可能出現冒用廣告」的分數，分數高的先看。</p>
+            <ol class="crawl-log" id="crawl-log"></ol>
+          </div>
+        </details>
+
+        <details class="more">
+          <summary>分數是怎麼算的</summary>
+          <div class="inner">
+            <p class="note">系統看連結上的文字有沒有下列特徵，乘上權重後加總。你確認或否定搜尋結果後，權重會跟著調整，並記在這台裝置上。</p>
+            <div class="scroll"><table class="layers" id="weights"></table></div>
+            <button type="button" class="small" id="weights-reset">恢復預設權重</button>
+          </div>
+        </details>
+      </div>
+
+      <div class="row end">
+        <button type="button" id="search-back">上一步</button>
+        <button type="button" id="search-manual">我自己有截圖，改用上傳</button>
+      </div>
+    </section>
+
+    <!-- 可疑內容 -->
     <section id="case" class="view" hidden>
-      <h1>你看到的是什麼？</h1>
+      <h1 id="case-title">你看到的是什麼？</h1>
+      <p class="lead" id="case-lead">選一個最接近的情況。之後的建議和文件會跟著調整。</p>
+
+      <div class="callout calm" id="picked" hidden></div>
+
       <fieldset class="choices" id="scenario">
-        <legend>情況</legend>
+        <legend>發生了什麼事</legend>
+        <div class="choice-grid" id="scenario-grid"></div>
       </fieldset>
 
       <fieldset class="choices" id="age-question" hidden>
         <legend>被拿去改的那張照片，拍攝時你是否未滿 18 歲？</legend>
-        <label><input type="radio" name="minor" value="no"> 已滿 18 歲</label>
-        <label><input type="radio" name="minor" value="yes"> 未滿 18 歲</label>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="minor" value="no"><span class="mark"></span><span class="body"><strong>已滿 18 歲</strong></span></label>
+          <label class="choice"><input type="radio" name="minor" value="yes"><span class="mark"></span><span class="body"><strong>未滿 18 歲</strong></span></label>
+        </div>
       </fieldset>
 
       <div class="callout" id="minor-callout" hidden>
         <strong>請不要下載、截圖或保存那個影像。</strong>
-        <p>涉及未滿 18 歲的影像時，系統不會收取或保存影像，只記錄網址等文字資訊。請直接撥打 113 保護專線或報警，由社工與警方處理。</p>
+        <p>涉及未滿 18 歲的影像時，系統不會收取或保存影像，只記錄網址等文字資訊。請直接撥打 113 保護專線或報警，由社工與警方處理。這不是你的錯。</p>
       </div>
 
+      <div id="suspect-upload">
+        <label class="drop" id="suspect-drop">
+          <svg class="icon"><use href="#i-upload"/></svg>
+          <strong id="suspect-title">上傳那張圖，或廣告的截圖</strong>
+          <span id="suspect-name">點這裡選檔案、把圖拖進來，或直接貼上截圖</span>
+          <input type="file" class="vh" id="suspect-file" accept="image/*">
+        </label>
+      </div>
+
+      <h2>在哪裡看到的？</h2>
+      <p class="note">知道多少填多少就好，不知道的可以留白。</p>
       <div class="grid">
         <label class="field">
-          <span>來源網址</span>
-          <input type="url" id="source-url" placeholder="https://" autocomplete="off">
+          <span>網址</span>
+          <input type="text" inputmode="url" id="source-url" placeholder="https://" autocomplete="off">
         </label>
         <label class="field">
           <span>平台</span>
-          <input type="text" id="platform" placeholder="例如 Facebook、YouTube" autocomplete="off">
+          <input type="text" id="platform" placeholder="例如 Facebook、YouTube、LINE" autocomplete="off">
         </label>
         <label class="field">
           <span>帳號或粉專名稱</span>
           <input type="text" id="account" autocomplete="off">
         </label>
         <label class="field" id="advertiser-field">
-          <span>廣告上揭露的刊登者或出資者（若有）</span>
+          <span>廣告上寫的刊登者或出資者</span>
           <input type="text" id="advertiser" autocomplete="off">
         </label>
         <label class="field">
-          <span>發現時間</span>
+          <span>什麼時候看到的</span>
           <input type="datetime-local" id="found-at">
         </label>
-      </div>
-
-      <div id="suspect-upload">
-        <label class="file-btn primary">
-          上傳可疑的圖片或廣告截圖
-          <input type="file" id="suspect-file" accept="image/*" hidden>
-        </label>
-        <p class="result-line" id="suspect-name"></p>
       </div>
 
       <div class="row end">
@@ -146,54 +327,68 @@
       </div>
     </section>
 
-    <!-- 步驟四：比對 -->
+    <!-- 比對 -->
     <section id="result" class="view" hidden>
       <h1>比對結果</h1>
-      <p class="verdict" id="verdict"></p>
+      <div class="verdict" id="verdict"></div>
       <div class="compare" id="compare"></div>
-      <table class="layers" id="layers"></table>
-      <p class="note">各層的判斷門檻是暫定值，尚未經實驗校正。結果僅供參考，請以你自己的確認為準。</p>
+      <details class="more">
+        <summary>看比對的細節</summary>
+        <div class="inner">
+          <p class="note">系統用四種方法各比一次。門檻是暫定值，還沒有用實驗校正。</p>
+          <div class="scroll"><table class="layers" id="layers"></table></div>
+        </div>
+      </details>
       <fieldset class="choices" id="confirm">
-        <legend>這是從你的照片來的嗎？</legend>
-        <label><input type="radio" name="confirm" value="yes"> 是，這是我的照片</label>
-        <label><input type="radio" name="confirm" value="unsure"> 不確定，但我想先存證</label>
-        <label><input type="radio" name="confirm" value="no"> 不是</label>
+        <legend>你自己看，這是從你的照片來的嗎？</legend>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="confirm" value="yes"><span class="mark"></span><span class="body"><strong>是，這是我的照片</strong></span></label>
+          <label class="choice"><input type="radio" name="confirm" value="unsure"><span class="mark"></span><span class="body"><strong>不確定，但我想先存證</strong></span></label>
+          <label class="choice"><input type="radio" name="confirm" value="no"><span class="mark"></span><span class="body"><strong>不是我的照片</strong></span></label>
+        </div>
       </fieldset>
+      <p class="result-line" id="confirm-note"></p>
       <div class="row end">
         <button type="button" id="result-back">上一步</button>
-        <button type="button" class="primary" id="result-next" disabled>下一步：存證</button>
+        <button type="button" class="primary" id="result-next" disabled>下一步：留下證據</button>
       </div>
     </section>
 
-    <!-- 步驟五：存證 -->
+    <!-- 存證 -->
     <section id="evidence" class="view" hidden>
-      <h1>存證</h1>
-      <p class="lead">先把證據留下來，再去檢舉下架。內容一旦被移除，就很難再取得。</p>
+      <h1>先把證據留下來</h1>
+      <p class="lead">檢舉之後，內容可能很快被移除，到時候就很難再取得。所以先存證，再檢舉。</p>
       <dl class="record" id="record"></dl>
+      <p class="note">「數位指紋」是用檔案內容算出來的一串字。檔案只要被改動一點點，指紋就會完全不同，所以可以用來證明檔案沒有被動過。</p>
       <label class="check" id="include-images-wrap">
-        <input type="checkbox" id="include-images" checked> 報告中包含影像
+        <input type="checkbox" id="include-images" checked> 報告裡放入圖片
       </label>
       <div class="row">
-        <button type="button" class="primary" id="print-report">列印或存成 PDF</button>
-        <button type="button" id="download-json">下載存證紀錄檔</button>
+        <button type="button" class="primary" id="print-report">存成 PDF 或列印</button>
+        <button type="button" id="download-json">下載紀錄檔</button>
       </div>
-      <p class="note">原型的限制：時間取自這台裝置的時鐘。正式版會把雜湊值送交第三方加蓋時間戳，並將檔案加密保存。關閉或重新整理這個頁面後，這次的資料就會消失，請先下載。</p>
+      <p class="note warn">關掉或重新整理這個頁面後，這次的資料就會消失，請先存檔。原型的限制：時間取自這台裝置的時鐘，正式版會加上第三方時間戳。</p>
       <div class="row end">
         <button type="button" id="evidence-back">上一步</button>
-        <button type="button" class="primary" id="evidence-next">下一步：採取行動</button>
+        <button type="button" class="primary" id="evidence-next">下一步：該怎麼做</button>
       </div>
     </section>
 
-    <!-- 步驟六：行動 -->
+    <!-- 行動 -->
     <section id="action" class="view" hidden>
-      <h1>接下來可以做的事</h1>
-      <p class="note warn">以下說明與文件是原型草稿，尚未經法律專業審核，不是法律意見。送出前請自行確認內容，必要時諮詢律師。</p>
-      <h2>可以走的路</h2>
-      <ol class="paths-list" id="legal-path"></ol>
-      <h2>文件草稿</h2>
+      <h1>接下來可以這樣做</h1>
+      <p class="lead">照順序一件一件來就好，做完可以打勾。不用一次全部做完。</p>
+      <ul class="todo" id="legal-path"></ul>
+      <h2>幫你寫好的文字</h2>
+      <p class="note">按「複製」就能貼到檢舉表單或訊息裡。送出前請自己看過一次。</p>
       <div id="documents"></div>
-      <h2>可以找誰</h2>
+      <h2>可以找誰幫忙</h2>
       <ul class="resources" id="resources"></ul>
+      <p class="note warn">以上說明與文字是原型草稿，還沒有經過法律專業審核，不是法律意見。必要時請諮詢律師。</p>
+      <div class="closing">
+        <strong>你已經做了很重要的一步。</strong>
+        被冒用不是你的錯。留下證據、說清楚，就是在保護自己，也在保護可能被騙的人。
+      </div>
       <div class="row end">
         <button type="button" id="action-back">上一步</button>
         <button type="button" id="restart">處理另一則內容</button>
@@ -201,16 +396,25 @@
     </section>
   </main>
 
+  <footer class="foot">尋影 TraceBack｜原型｜提供一般資訊，不是法律意見</footer>
+
   <dialog id="help">
     <h2>需要協助</h2>
     <ul class="resources">
-      <li><strong>165 反詐騙專線</strong><span>詐騙通報與查證</span></li>
-      <li><strong>113 保護專線</strong><span>遇到不雅影像或性暴力，社工可陪同處理</span></li>
-      <li><strong>110</strong><span>有立即危險時報警</span></li>
-      <li><strong>法律扶助基金會</strong><span><a href="https://www.laf.org.tw" target="_blank" rel="noopener">www.laf.org.tw</a></span></li>
+      <li><a class="tel" href="tel:165">165 反詐騙專線</a><span>詐騙通報與查證</span></li>
+      <li><a class="tel" href="tel:113">113 保護專線</a><span>遇到不雅影像或性暴力，社工可以陪你處理</span></li>
+      <li><a class="tel" href="tel:110">110</a><span>有立即危險時報警</span></li>
+      <li><a href="https://www.laf.org.tw" target="_blank" rel="noopener">法律扶助基金會</a><span>符合資格可以申請免費律師</span></li>
     </ul>
-    <p class="note">你可以隨時離開這個流程。找一位信任的人陪你一起處理也可以。</p>
+    <p class="note">你可以隨時離開這個流程，晚一點再回來。找一位信任的人陪你一起處理也很好。</p>
     <form method="dialog"><button class="primary">關閉</button></form>
+  </dialog>
+
+  <dialog id="oops">
+    <h2>出了一點狀況</h2>
+    <p id="oops-text"></p>
+    <p class="note">你的資料沒有外流。可以再試一次；如果還是不行，請重新整理頁面。</p>
+    <form method="dialog"><button class="primary">好</button></form>
   </dialog>
 
   <section id="report" aria-hidden="true"></section>

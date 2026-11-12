@@ -158,12 +158,12 @@ export function buildDocuments(c) {
 
 export const RESOURCES = {
   common: [
-    { name: '165 反詐騙專線', detail: '電話 165，詐騙通報與查證' },
-    { name: '110', detail: '有立即危險時報警' },
+    { name: '165 反詐騙專線', detail: '詐騙通報與查證', tel: '165' },
+    { name: '110', detail: '有立即危險時報警', tel: '110' },
     { name: '法律扶助基金會', detail: '符合資格可申請免費律師', url: 'https://www.laf.org.tw' },
   ],
   intimate: [
-    { name: '113 保護專線', detail: '電話 113，社工可說明流程並陪同報案' },
+    { name: '113 保護專線', detail: '社工可以說明流程並陪同報案', tel: '113' },
     { name: '衛生福利部性影像處理中心', detail: '受理下架申訴' },
   ],
 };

@@ -20,6 +20,7 @@ export const THRESHOLDS = {
   inlierRatioHigh: 0.5, // 通過幾何驗證的比例
   inlierRatioMid: 0.35,
   faceSame: 0.5, // 人臉特徵的歐氏距離，越小越像
+  faceId: 0.55, // 證件照通常較舊、較小，放寬一些
   diffPixel: 40, // 灰階差異超過此值視為被改動
 };
 
@@ -228,6 +229,26 @@ function localFeatures(cv, canvas) {
   return f;
 }
 
+// 釋放單一畫布的特徵點。搜尋時看過就丟的圖用這個。
+export function forgetFeatures(canvas) {
+  const f = featureCache.get(canvas);
+  if (f) {
+    f.des.delete();
+    featureCache.delete(canvas);
+  }
+}
+
+export function flipCanvas(source) {
+  const c = document.createElement('canvas');
+  c.width = source.width;
+  c.height = source.height;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.translate(c.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(source, 0, 0);
+  return c;
+}
+
 // 釋放快取的特徵點。OpenCV 的記憶體不會自動回收。
 export function clearFeatureCache() {
   for (const f of featureCache.values()) f.des.delete();
@@ -415,10 +436,23 @@ export async function describe(canvas, { withEmbedding = true, withFaces = true 
 export async function comparePair(ref, sus) {
   const hashDistance = hamming(ref.hash, sus.hash);
   const embedSim = ref.embedding && sus.embedding ? cosine(ref.embedding, sus.embedding) : null;
-  const local = await localMatch(ref.canvas, sus.canvas);
+  let local = await localMatch(ref.canvas, sus.canvas);
   const faceDist = closestFace(ref.faces, sus.faces);
 
   const T = THRESHOLDS;
+  // 左右翻轉會讓雜湊與特徵點都對不上。其他層顯示可能相關時，把可疑圖翻回來再試一次。
+  let mirrored = false;
+  const related = (embedSim !== null && embedSim >= T.embedMid) || (faceDist !== null && faceDist <= T.faceSame);
+  if (local.inliers < T.inliersMid && related) {
+    const flipped = flipCanvas(sus.canvas);
+    const alt = await localMatch(ref.canvas, flipped);
+    forgetFeatures(flipped);
+    if (alt.inliers > local.inliers && alt.inliers >= T.inliersMid) {
+      if (alt.overlay) alt.overlay = flipCanvas(alt.overlay);
+      local = alt;
+      mirrored = true;
+    }
+  }
   // 幾何驗證同時看數量與比例：不相干的圖偶爾也會湊出十幾組配對，但比例很低
   const ratio = local.good ? local.inliers / local.good : 0;
   const layers = {
@@ -443,5 +477,5 @@ export async function comparePair(ref, sus) {
 
   // 排序用：幾何驗證最可靠，其次是特徵向量與雜湊
   const rank = local.inliers * 10 + (embedSim || 0) * 100 + (64 - hashDistance);
-  return { hashDistance, embedSim, local, faceDist, layers, verdict, rank };
+  return { hashDistance, embedSim, local, faceDist, layers, verdict, rank, mirrored };
 }
