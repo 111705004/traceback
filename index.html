@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>尋影 TraceBack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <strong>尋影 TraceBack</strong>
+      <span class="tag">原型</span>
+    </div>
+    <button type="button" class="help-btn" id="help-open">需要協助</button>
+  </header>
+
+  <p class="privacy">你的照片與證據只在這台裝置的瀏覽器裡處理，不會上傳。比對用的模型檔會從公開的檔案伺服器下載。</p>
+
+  <ol class="steps" id="steps" aria-label="流程">
+    <li data-step="bind">確認本人</li>
+    <li data-step="library">參考照片</li>
+    <li data-step="case">可疑內容</li>
+    <li data-step="result">比對</li>
+    <li data-step="evidence">存證</li>
+    <li data-step="action">行動</li>
+  </ol>
+
+  <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+
+  <main>
+    <!-- 首頁 -->
+    <section id="home" class="view">
+      <h1>你的臉被拿去用了嗎？</h1>
+      <p class="lead">有人用你的照片打詐騙廣告、假代言，或改造成其他內容時，這裡可以幫你比對出被盜用的原圖、保全證據，並整理好檢舉、通報與報案要用的資料。</p>
+      <div class="paths">
+        <article class="card">
+          <h2>我已經看到那則內容</h2>
+          <p>你手上有截圖或連結。上傳後，系統會找出它來自你的哪張照片、哪裡被改過。</p>
+          <button type="button" class="primary" id="start-path1">開始</button>
+        </article>
+        <article class="card muted">
+          <h2>幫我找找看 <span class="tag">下一版</span></h2>
+          <p>從你的照片出發，搜尋公開的廣告與貼文。這個功能需要身分證驗證，目前尚未開放。</p>
+          <button type="button" disabled>尚未開放</button>
+        </article>
+      </div>
+      <p class="note">這是競賽用的原型，提供的是一般資訊與文件草稿，不是法律意見，也不能取代律師。</p>
+      <p class="note">開發用：<a href="experiment.html">比對實驗頁</a>，批次測試四層比對的認回率與誤判率。</p>
+    </section>
+
+    <!-- 步驟一：確認本人 -->
+    <section id="bind" class="view" hidden>
+      <h1>先確認是你本人</h1>
+      <p class="lead">系統只讓你比對自己的照片。請用鏡頭拍一張自拍，接下來加入的每張參考照都必須是同一張臉。</p>
+      <label class="field">
+        <span>你對外使用的名稱（會放進文件草稿，可留白）</span>
+        <input type="text" id="display-name" autocomplete="off" maxlength="40">
+      </label>
+      <div class="camera">
+        <video id="video" playsinline muted hidden></video>
+        <canvas id="selfie-preview" hidden></canvas>
+      </div>
+      <div class="row">
+        <button type="button" class="primary" id="camera-start">開啟鏡頭</button>
+        <button type="button" class="primary" id="camera-shot" hidden>拍照</button>
+        <label class="file-btn">
+          改用上傳自拍照
+          <input type="file" id="selfie-file" accept="image/*" hidden>
+        </label>
+      </div>
+      <p class="note">原型的限制：這裡只擷取即時畫面，沒有防偽檢測；上傳自拍照只供展示使用。自拍只用來算出臉部特徵，不會保存影像。</p>
+      <p class="result-line" id="bind-result"></p>
+      <div class="row end">
+        <button type="button" class="primary" id="bind-next" disabled>下一步</button>
+      </div>
+    </section>
+
+    <!-- 步驟二：參考照片 -->
+    <section id="library" class="view" hidden>
+      <h1>加入你的照片</h1>
+      <p class="lead">選擇你公開發布過、可能被拿去用的照片。影片可以先截圖再加入。照片裡的臉必須與剛才的自拍相符。</p>
+      <label class="file-btn primary">
+        選擇照片
+        <input type="file" id="ref-files" accept="image/*" multiple hidden>
+      </label>
+      <ul class="thumbs" id="ref-list"></ul>
+      <div class="row end">
+        <button type="button" id="library-back">上一步</button>
+        <button type="button" class="primary" id="library-next" disabled>下一步</button>
+      </div>
+    </section>
+
+    <!-- 步驟三：可疑內容 -->
+    <section id="case" class="view" hidden>
+      <h1>你看到的是什麼？</h1>
+      <fieldset class="choices" id="scenario">
+        <legend>情況</legend>
+      </fieldset>
+
+      <fieldset class="choices" id="age-question" hidden>
+        <legend>被拿去改的那張照片，拍攝時你是否未滿 18 歲？</legend>
+        <label><input type="radio" name="minor" value="no"> 已滿 18 歲</label>
+        <label><input type="radio" name="minor" value="yes"> 未滿 18 歲</label>
+      </fieldset>
+
+      <div class="callout" id="minor-callout" hidden>
+        <strong>請不要下載、截圖或保存那個影像。</strong>
+        <p>涉及未滿 18 歲的影像時，系統不會收取或保存影像，只記錄網址等文字資訊。請直接撥打 113 保護專線或報警，由社工與警方處理。</p>
+      </div>
+
+      <div class="grid">
+        <label class="field">
+          <span>來源網址</span>
+          <input type="url" id="source-url" placeholder="https://" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>平台</span>
+          <input type="text" id="platform" placeholder="例如 Facebook、YouTube" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>帳號或粉專名稱</span>
+          <input type="text" id="account" autocomplete="off">
+        </label>
+        <label class="field" id="advertiser-field">
+          <span>廣告上揭露的刊登者或出資者（若有）</span>
+          <input type="text" id="advertiser" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>發現時間</span>
+          <input type="datetime-local" id="found-at">
+        </label>
+      </div>
+
+      <div id="suspect-upload">
+        <label class="file-btn primary">
+          上傳可疑的圖片或廣告截圖
+          <input type="file" id="suspect-file" accept="image/*" hidden>
+        </label>
+        <p class="result-line" id="suspect-name"></p>
+      </div>
+
+      <div class="row end">
+        <button type="button" id="case-back">上一步</button>
+        <button type="button" class="primary" id="case-next" disabled>開始比對</button>
+      </div>
+    </section>
+
+    <!-- 步驟四：比對 -->
+    <section id="result" class="view" hidden>
+      <h1>比對結果</h1>
+      <p class="verdict" id="verdict"></p>
+      <div class="compare" id="compare"></div>
+      <table class="layers" id="layers"></table>
+      <p class="note">各層的判斷門檻是暫定值，尚未經實驗校正。結果僅供參考，請以你自己的確認為準。</p>
+      <fieldset class="choices" id="confirm">
+        <legend>這是從你的照片來的嗎？</legend>
+        <label><input type="radio" name="confirm" value="yes"> 是，這是我的照片</label>
+        <label><input type="radio" name="confirm" value="unsure"> 不確定，但我想先存證</label>
+        <label><input type="radio" name="confirm" value="no"> 不是</label>
+      </fieldset>
+      <div class="row end">
+        <button type="button" id="result-back">上一步</button>
+        <button type="button" class="primary" id="result-next" disabled>下一步：存證</button>
+      </div>
+    </section>
+
+    <!-- 步驟五：存證 -->
+    <section id="evidence" class="view" hidden>
+      <h1>存證</h1>
+      <p class="lead">先把證據留下來，再去檢舉下架。內容一旦被移除，就很難再取得。</p>
+      <dl class="record" id="record"></dl>
+      <label class="check" id="include-images-wrap">
+        <input type="checkbox" id="include-images" checked> 報告中包含影像
+      </label>
+      <div class="row">
+        <button type="button" class="primary" id="print-report">列印或存成 PDF</button>
+        <button type="button" id="download-json">下載存證紀錄檔</button>
+      </div>
+      <p class="note">原型的限制：時間取自這台裝置的時鐘。正式版會把雜湊值送交第三方加蓋時間戳，並將檔案加密保存。關閉或重新整理這個頁面後，這次的資料就會消失，請先下載。</p>
+      <div class="row end">
+        <button type="button" id="evidence-back">上一步</button>
+        <button type="button" class="primary" id="evidence-next">下一步：採取行動</button>
+      </div>
+    </section>
+
+    <!-- 步驟六：行動 -->
+    <section id="action" class="view" hidden>
+      <h1>接下來可以做的事</h1>
+      <p class="note warn">以下說明與文件是原型草稿，尚未經法律專業審核，不是法律意見。送出前請自行確認內容，必要時諮詢律師。</p>
+      <h2>可以走的路</h2>
+      <ol class="paths-list" id="legal-path"></ol>
+      <h2>文件草稿</h2>
+      <div id="documents"></div>
+      <h2>可以找誰</h2>
+      <ul class="resources" id="resources"></ul>
+      <div class="row end">
+        <button type="button" id="action-back">上一步</button>
+        <button type="button" id="restart">處理另一則內容</button>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="help">
+    <h2>需要協助</h2>
+    <ul class="resources">
+      <li><strong>165 反詐騙專線</strong><span>詐騙通報與查證</span></li>
+      <li><strong>113 保護專線</strong><span>遇到不雅影像或性暴力，社工可陪同處理</span></li>
+      <li><strong>110</strong><span>有立即危險時報警</span></li>
+      <li><strong>法律扶助基金會</strong><span><a href="https://www.laf.org.tw" target="_blank" rel="noopener">www.laf.org.tw</a></span></li>
+    </ul>
+    <p class="note">你可以隨時離開這個流程。找一位信任的人陪你一起處理也可以。</p>
+    <form method="dialog"><button class="primary">關閉</button></form>
+  </dialog>
+
+  <section id="report" aria-hidden="true"></section>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

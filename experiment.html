@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>比對實驗｜尋影 TraceBack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <strong>尋影 TraceBack</strong>
+      <span class="tag">比對實驗</span>
+    </div>
+    <a href="index.html">回到主流程</a>
+  </header>
+
+  <p class="privacy">所有圖片只在這台裝置的瀏覽器裡處理，不會上傳。</p>
+
+  <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+
+  <main>
+    <section class="view">
+      <h1>四層比對的認回率與誤判率</h1>
+      <p class="lead">一次放入原圖、改造圖與對照圖，系統會把每張測試圖和每張原圖都比一次，算出各層方法認回了多少、誤判了多少。</p>
+
+      <h2>準備檔案</h2>
+      <ul>
+        <li><strong>原圖</strong>：本人同意使用的照片，檔名隨意，例如 <code>a01.jpg</code>。</li>
+        <li><strong>改造圖</strong>：檔名用「原圖主檔名、兩個底線、處理方式」，例如 <code>a01__加字.jpg</code>、<code>a01__裁切.jpg</code>、<code>a01__AI換背景.png</code>。系統靠檔名知道它來自哪張原圖。</li>
+        <li><strong>對照圖</strong>：不是由任何一張原圖改來的照片，例如同一人的其他照片。用來測誤判。</li>
+      </ul>
+      <p class="note">請不要使用任何不雅影像。用加字、裁切、濾鏡、換背景、換衣服這類無害的處理來代表改造。</p>
+
+      <div class="grid">
+        <div>
+          <label class="file-btn">選擇原圖<input type="file" id="originals" accept="image/*" multiple hidden></label>
+          <p class="result-line" id="originals-count">尚未選擇</p>
+        </div>
+        <div>
+          <label class="file-btn">選擇改造圖<input type="file" id="edited" accept="image/*" multiple hidden></label>
+          <p class="result-line" id="edited-count">尚未選擇</p>
+        </div>
+        <div>
+          <label class="file-btn">選擇對照圖<input type="file" id="negatives" accept="image/*" multiple hidden></label>
+          <p class="result-line" id="negatives-count">尚未選擇，可省略</p>
+        </div>
+      </div>
+      <ul class="warnings" id="warnings"></ul>
+      <div class="row">
+        <button type="button" class="primary" id="run" disabled>開始實驗</button>
+      </div>
+    </section>
+
+    <section class="view" id="results" hidden>
+      <h1>結果</h1>
+      <p id="overview"></p>
+
+      <h2>各層的認回率與誤判率</h2>
+      <div class="scroll"><table class="layers" id="summary"></table></div>
+      <ul class="note">
+        <li>認回率：改造圖與它真正的原圖比對時，達到該等級的比例。越高越好。</li>
+        <li>對照圖誤判率：對照圖至少被判定與一張原圖相符的比例。越低越好。</li>
+        <li>配錯原圖：改造圖與「不是它來源」的原圖比對時，被判定相符的比例。越低越好。</li>
+        <li>如果原圖都是同一個人，人臉相似度的誤判率與配錯率偏高是正常的：它認的是人，不是照片。</li>
+      </ul>
+
+      <h2>依處理方式</h2>
+      <div class="scroll"><table class="layers" id="by-type"></table></div>
+      <p class="note">數字是認回率，含「部分相符」。</p>
+
+      <h2>數值分布</h2>
+      <div class="scroll"><table class="layers" id="spread"></table></div>
+      <p class="note">拿「應該相符」的最差值和「不該相符」的最好值相比，可以看出門檻該設在哪裡。兩者重疊就表示這一層單獨分不開。</p>
+
+      <h2>沒有被認回的改造圖</h2>
+      <div class="scroll"><table class="layers" id="misses"></table></div>
+
+      <div class="row">
+        <button type="button" class="primary" id="download-csv">下載全部配對的數值</button>
+        <button type="button" id="copy-summary">複製摘要表格</button>
+      </div>
+      <p class="note">下載的檔案包含每一組配對的原始數值，可以用試算表重新試不同的門檻。目前使用的門檻：<span id="thresholds"></span></p>
+    </section>
+  </main>
+
+  <script type="module" src="js/experiment.js"></script>
+</body>
+</html>
