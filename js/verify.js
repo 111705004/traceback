@@ -221,8 +221,23 @@ async function sendReport() {
         note: $('report-note').value.trim(),
       },
     });
-    setLine('report-result', `已交給本人。回報編號：${r.id}。請記下來，之後可以在下面查詢處理進度。`, 'ok');
-    $('lookup-id').value = r.id;
+    const link = `${location.origin}${location.pathname}#r=${r.id}`;
+    const line = $('report-result');
+    line.className = 'result-line ok';
+    line.innerHTML = `已交給本人。本人處理後，打開這個連結就能看到結果，請存起來：<br><a href="${esc(link)}">${esc(link)}</a>`;
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'small';
+    copy.textContent = '複製連結';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(link);
+        copy.textContent = '已複製';
+      } catch (_) {
+        copy.textContent = '請長按連結複製';
+      }
+    });
+    line.append(' ', copy);
   } catch (err) {
     setLine('report-result', err.message, 'bad');
     $('report-send').disabled = false;
@@ -237,6 +252,29 @@ const REPORT_STATUS = {
   authorized: '本人已確認：這是授權的內容',
   dismissed: '本人表示與他無關',
 };
+
+const STATUS_LOOK = { pending: ['', 'clock'], fake: ['strong', 'alert'], authorized: ['calm', 'check'], dismissed: ['calm', 'check'] };
+
+// 從進度連結（verify.html#r=…）打開時，在頁面最上方顯示結果
+async function showProgress(id) {
+  $('progress-view').hidden = false;
+  const box = $('progress-verdict');
+  box.className = 'verdict';
+  box.innerHTML = '<div><strong>讀取中</strong></div>';
+  try {
+    const r = await api(`/api/reports/${id}`);
+    const [cls, ic] = STATUS_LOOK[r.status] || ['', 'help'];
+    box.className = `verdict ${cls}`;
+    const note = r.kol_note ? `<p>本人說明：「${esc(r.kol_note)}」</p>` : '';
+    const when = r.decided_at ? `，${esc(fmtTime(r.decided_at))} 處理` : '';
+    box.innerHTML = `${icon(ic)}<div><strong>${esc(REPORT_STATUS[r.status] || r.status)}</strong><p>你在 ${esc(fmtTime(r.created_at))} 回報給 ${esc(r.display_name)}${when}。</p>${note}${
+      r.status === 'pending' ? '<p>本人還沒看到。可以晚點再打開這個連結。</p>' : ''
+    }</div>`;
+  } catch (err) {
+    box.className = 'verdict';
+    box.innerHTML = `${icon('help')}<div><strong>查不到這則回報</strong><p>${esc(err.message)}</p></div>`;
+  }
+}
 
 async function lookup() {
   const id = $('lookup-id').value.trim().toLowerCase();
@@ -304,10 +342,15 @@ function init() {
 
   // 從 LINE 等地方分享過來的連結可以帶回報編號：verify.html#r=xxxx
   const m = location.hash.match(/r=([0-9a-f]{12})/);
-  if (m) {
-    $('lookup-id').value = m[1];
-    lookup();
-  }
+  if (m && hasBackend()) showProgress(m[1]);
+  // 在同一頁點進度連結時，網址只改 # 後面，不會重新載入
+  window.addEventListener('hashchange', () => {
+    const h = location.hash.match(/r=([0-9a-f]{12})/);
+    if (h && hasBackend()) {
+      showProgress(h[1]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
 }
 
 init();

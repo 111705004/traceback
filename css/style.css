@@ -684,3 +684,5 @@ footer.foot { text-align: center; color: var(--muted); font-size: 0.8125rem; mar
   .victim-options { padding-left: 10px; }
 }
 @media (max-width: 640px) { .hero { grid-template-columns: 1fr; } .hero-art { display: none; } }
+.inline-input { flex: 1; min-width: 0; font: inherit; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-soft); color: var(--text); }
+.help-btn { white-space: nowrap; flex: none; }
