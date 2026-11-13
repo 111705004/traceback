@@ -21,14 +21,14 @@
 
   <header class="top">
     <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到首頁">
-      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
+      <span class="logo"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span>
       <strong>尋影 TraceBack</strong>
       <span class="tag">查證代言</span>
     </a>
-    <button type="button" class="help-btn" id="help-open"><svg class="icon"><use href="#i-help"/></svg>需要協助</button>
+    <button type="button" class="help-btn" id="help-open"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>需要協助</button>
   </header>
 
-  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>截圖先在你的裝置上轉成臉部特徵數值，送出比對的是數值，不是截圖。只有你按下「交給本人確認」時，才會上傳縮小後的截圖。</span></p>
+  <p class="privacy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span>截圖先在你的裝置上轉成臉部特徵數值，送出比對的是數值，不是截圖。只有你按下「交給本人確認」時，才會上傳縮小後的截圖。</span></p>
 
   <div class="status" id="status" role="status" aria-live="polite" hidden></div>
 
@@ -46,7 +46,7 @@
       <p class="callout" id="no-backend" hidden>這個網站還沒連上後端，目前無法查證。部署方式見 <code>backend/README.md</code>。</p>
 
       <label class="drop" id="shot-drop">
-        <svg class="icon"><use href="#i-upload"/></svg>
+        <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
         <strong id="shot-title">上傳廣告、貼文或帳號頭像的截圖</strong>
         <span id="shot-name">點這裡選檔案、把圖拖進來，或直接貼上截圖</span>
         <input type="file" class="vh" id="shot-file" accept="image/*">
@@ -76,7 +76,7 @@
       </fieldset>
 
       <div class="row end">
-        <button type="button" class="primary" id="check" disabled><svg class="icon"><use href="#i-search"/></svg>查證</button>
+        <button type="button" class="primary" id="check" disabled><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>查證</button>
       </div>
     </section>
 

@@ -146,7 +146,7 @@ function setupDrop(dropId, inputId, key) {
 
 function progress(text, ratio) {
   $('step-text').textContent = text;
-  if (ratio !== undefined) $('step-bar').style.width = `${Math.round(Math.min(1, ratio) * 100)}%`;
+  if (ratio !== undefined) $('step-bar').style.transform = `scaleX(${Math.min(1, ratio)})`;
 }
 
 // 模型檔下載進度：transformers.js 會分檔回報，取目前最大那個檔案的進度

@@ -16,13 +16,13 @@
 
   <header class="top">
     <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到首頁">
-      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
+      <span class="logo"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span>
       <strong>尋影 TraceBack</strong>
       <span class="tag">比對實驗</span>
     </a>
   </header>
 
-  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>所有圖片只在這台裝置的瀏覽器裡處理，不會上傳。</span></p>
+  <p class="privacy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span>所有圖片只在這台裝置的瀏覽器裡處理，不會上傳。</span></p>
 
   <main>
     <section class="view" id="setup">
@@ -32,7 +32,7 @@
       <h2>1. 本人的照片 <span class="pill">必填</span></h2>
       <p class="note">1 到 10 張，臉清楚的最好。請用本人同意使用的照片，不要用不雅影像。</p>
       <label class="drop" id="orig-drop">
-        <svg class="icon"><use href="#i-upload"/></svg>
+        <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
         <strong>選照片，或把照片拖進來</strong>
         <span id="orig-count">還沒有照片</span>
         <input type="file" class="vh" id="orig-files" accept="image/*" multiple>
@@ -42,7 +42,7 @@
       <h2>2. 別人的照片 <span class="pill">選填，建議放</span></h2>
       <p class="note">用來測兩件事：會不會把別人誤認成本人，以及自動換臉（把本人的五官貼到別人臉上）抓不抓得到。</p>
       <label class="drop" id="other-drop">
-        <svg class="icon"><use href="#i-upload"/></svg>
+        <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
         <strong>選照片，或把照片拖進來</strong>
         <span id="other-count">還沒有照片</span>
         <input type="file" class="vh" id="other-files" accept="image/*" multiple>
@@ -52,7 +52,7 @@
       <h2>3. 你自己做的改造圖 <span class="pill">選填</span></h2>
       <p class="note">例如用 AI 工具把本人照片換背景、換衣服、換臉、重繪。這是最能證明效果的一組。每張圖選它是從哪張原圖改來的。</p>
       <label class="drop" id="own-drop">
-        <svg class="icon"><use href="#i-upload"/></svg>
+        <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
         <strong>選圖片，或把圖片拖進來</strong>
         <span id="own-count">還沒有圖片</span>
         <input type="file" class="vh" id="own-files" accept="image/*" multiple>

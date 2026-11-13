@@ -54,7 +54,7 @@ function show(view) {
   if (idx >= 0) {
     $('progress-count').textContent = `第 ${idx + 1} 步，共 ${flow.length} 步`;
     $('progress-name').textContent = STEP_NAMES[view];
-    $('progress-bar').style.width = `${((idx + 1) / flow.length) * 100}%`;
+    $('progress-bar').style.transform = `scaleX(${(idx + 1) / flow.length})`;
   }
   window.scrollTo(0, 0);
 }

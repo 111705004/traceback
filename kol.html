@@ -22,13 +22,13 @@
 
   <header class="top">
     <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到首頁">
-      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
+      <span class="logo"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span>
       <strong>尋影 TraceBack</strong>
       <span class="tag">本人登錄</span>
     </a>
   </header>
 
-  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>照片在你的裝置上轉成臉部特徵數值，伺服器只保存數值、不保存照片。你可以隨時刪除全部資料。</span></p>
+  <p class="privacy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span>照片在你的裝置上轉成臉部特徵數值，伺服器只保存數值、不保存照片。你可以隨時刪除全部資料。</span></p>
 
   <div class="status" id="status" role="status" aria-live="polite" hidden></div>
 
@@ -63,12 +63,12 @@
       <h1>先確認是你本人</h1>
       <p class="lead">請拍一張自拍。之後加入的照片都要和這張是同一張臉，別人的照片放不進來。</p>
       <div class="camera">
-        <video id="video" playsinline muted hidden></video>
-        <canvas id="selfie-preview" hidden></canvas>
+        <video id="video" playsinline muted hidden aria-label="鏡頭畫面"></video>
+        <canvas id="selfie-preview" hidden aria-label="你的自拍預覽"></canvas>
       </div>
       <div class="row">
-        <button type="button" class="primary" id="camera-start"><svg class="icon"><use href="#i-camera"/></svg>開啟鏡頭拍一張</button>
-        <button type="button" class="primary" id="camera-shot" hidden><svg class="icon"><use href="#i-camera"/></svg>拍照</button>
+        <button type="button" class="primary" id="camera-start"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>開啟鏡頭拍一張</button>
+        <button type="button" class="primary" id="camera-shot" hidden><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>拍照</button>
         <label class="file-btn">
           改用上傳自拍照
           <input type="file" class="vh" id="selfie-file" accept="image/*">
@@ -87,7 +87,7 @@
       <h1>加入你的照片</h1>
       <p class="lead">選幾張你公開用過的照片：大頭貼、宣傳照、節目截圖。照片越多樣，民眾的截圖越容易認得出你。</p>
       <label class="drop" id="ref-drop">
-        <svg class="icon"><use href="#i-upload"/></svg>
+        <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
         <strong>點這裡選照片，或把照片拖進來</strong>
         <span>最多 11 張。照片本身不會上傳</span>
         <input type="file" class="vh" id="ref-files" accept="image/*" multiple>

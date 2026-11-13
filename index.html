@@ -25,14 +25,14 @@
 
   <header class="top">
     <button type="button" class="brand" id="home-link" aria-label="尋影 TraceBack，回到首頁">
-      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
+      <span class="logo"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span>
       <strong>尋影 TraceBack</strong>
       <span class="tag">原型</span>
     </button>
-    <button type="button" class="help-btn" id="help-open"><svg class="icon"><use href="#i-help"/></svg>需要協助</button>
+    <button type="button" class="help-btn" id="help-open"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>需要協助</button>
   </header>
 
-  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>比對你的照片時，照片和證據只留在這台裝置上，不會上傳。</span></p>
+  <p class="privacy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span>比對你的照片時，照片和證據只留在這台裝置上，不會上傳。</span></p>
 
   <div class="progress" id="progress" hidden>
     <div class="progress-text"><span id="progress-count"></span><strong id="progress-name"></strong></div>
@@ -49,8 +49,8 @@
           <h1>臉被盜用，或看到可疑的代言？</h1>
           <p class="lead">選一個最符合你的情況就好。</p>
           <ul class="chips">
-            <li><svg class="icon"><use href="#i-heart"/></svg>免費</li>
-            <li><svg class="icon"><use href="#i-lock"/></svg>照片在你的裝置上比對</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>免費</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>照片在你的裝置上比對</li>
           </ul>
         </div>
         <svg class="hero-art" viewBox="0 0 200 200" role="img" aria-label="一張照片被放大鏡檢視">
@@ -71,20 +71,20 @@
       <h2 class="vh-title" id="role-title">你是哪一種情況？</h2>
       <div class="roles" role="group" aria-labelledby="role-title">
         <a class="role" href="verify.html">
-          <span class="badge"><svg class="icon"><use href="#i-shield"/></svg></span>
+          <span class="badge"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span>
           <span class="role-text">
             <strong>我看到可疑的廣告或帳號</strong>
             <span>有人用老師、醫師或名人的名義推薦投資、邀你進 LINE 群組。上傳截圖，查是不是本人。</span>
           </span>
-          <span class="go" aria-hidden="true">›</span>
+          <span class="go" aria-hidden="true"></span>
         </a>
         <button type="button" class="role" id="role-victim" aria-expanded="false" aria-controls="victim-options">
-          <span class="badge"><svg class="icon"><use href="#i-eye"/></svg></span>
+          <span class="badge"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></span>
           <span class="role-text">
             <strong>我的照片被冒用了，或擔心被冒用</strong>
             <span>留下證據、準備檢舉文字，或讓民眾查得到你。</span>
           </span>
-          <span class="go" aria-hidden="true">›</span>
+          <span class="go" aria-hidden="true"></span>
         </button>
       </div>
 
@@ -96,21 +96,21 @@
               <strong>我已經看到那則內容 <span class="pill high">最常用</span></strong>
               <span>手上有截圖或連結。找出它用了你哪張照片、哪裡被改過，留下證據並寫好檢舉文字。約 10 分鐘。</span>
             </span>
-            <span class="go" aria-hidden="true">›</span>
+            <span class="go" aria-hidden="true"></span>
           </button>
           <button type="button" class="option" id="start-find">
             <span class="option-text">
               <strong>還沒看到，想找找看哪裡在用我的照片</strong>
               <span>系統幫你掃描網頁、比對你的照片。因為會主動搜尋，需要多一道證件驗證。</span>
             </span>
-            <span class="go" aria-hidden="true">›</span>
+            <span class="go" aria-hidden="true"></span>
           </button>
           <a class="option" href="kol.html">
             <span class="option-text">
               <strong>讓民眾查得到我，有人冒用時通知我</strong>
               <span>登錄你的官方帳號和「我不會做的事」。民眾查證時會看到你的聲明，可疑內容會交給你確認。適合常被冒用的人。</span>
             </span>
-            <span class="go" aria-hidden="true">›</span>
+            <span class="go" aria-hidden="true"></span>
           </a>
         </div>
       </div>
@@ -143,12 +143,12 @@
       <h1>先確認是你本人</h1>
       <p class="lead">請拍一張自拍。這樣可以確保只有你能查自己的照片，別人沒辦法拿你的照片來用這個工具。</p>
       <div class="camera">
-        <video id="video" playsinline muted hidden></video>
-        <canvas id="selfie-preview" hidden></canvas>
+        <video id="video" playsinline muted hidden aria-label="鏡頭畫面"></video>
+        <canvas id="selfie-preview" hidden aria-label="你的自拍預覽"></canvas>
       </div>
       <div class="row">
-        <button type="button" class="primary" id="camera-start"><svg class="icon"><use href="#i-camera"/></svg>開啟鏡頭拍一張</button>
-        <button type="button" class="primary" id="camera-shot" hidden><svg class="icon"><use href="#i-camera"/></svg>拍照</button>
+        <button type="button" class="primary" id="camera-start"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>開啟鏡頭拍一張</button>
+        <button type="button" class="primary" id="camera-shot" hidden><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>拍照</button>
         <label class="file-btn">
           改用上傳自拍照
           <input type="file" class="vh" id="selfie-file" accept="image/*">
@@ -176,7 +176,7 @@
         <li>照片裡的臉要和剛才的自拍是同一個人，否則不會被加入。</li>
       </ul>
       <label class="drop" id="ref-drop">
-        <svg class="icon"><use href="#i-upload"/></svg>
+        <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
         <strong>點這裡選照片，或把照片拖進來</strong>
         <span>可以一次選很多張</span>
         <input type="file" class="vh" id="ref-files" accept="image/*" multiple>
@@ -193,7 +193,7 @@
       <h1>多一道確認：身分證件</h1>
       <p class="lead">「幫我找找看」會主動去搜尋，所以要多確認一次你是本人。請拍下或上傳身分證正面，系統會比對證件上的照片和剛才的自拍。</p>
       <label class="drop" id="id-drop">
-        <svg class="icon"><use href="#i-id"/></svg>
+        <svg class="icon" aria-hidden="true"><use href="#i-id"/></svg>
         <strong>點這裡上傳身分證正面</strong>
         <span>只在你的裝置上比對，比對完立刻丟棄，不保存、不上傳</span>
         <input type="file" class="vh" id="id-file" accept="image/*">
@@ -247,7 +247,7 @@
       </div>
 
       <div class="row">
-        <button type="button" class="primary" id="search-start"><svg class="icon"><use href="#i-search"/></svg>開始找</button>
+        <button type="button" class="primary" id="search-start"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>開始找</button>
         <button type="button" id="search-stop" hidden>停止</button>
       </div>
 
@@ -312,7 +312,7 @@
 
       <div id="suspect-upload">
         <label class="drop" id="suspect-drop">
-          <svg class="icon"><use href="#i-upload"/></svg>
+          <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
           <strong id="suspect-title">上傳那張圖，或廣告的截圖</strong>
           <span id="suspect-name">點這裡選檔案、把圖拖進來，或直接貼上截圖</span>
           <input type="file" class="vh" id="suspect-file" accept="image/*">
