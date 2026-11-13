@@ -32,7 +32,7 @@ export function legalPath(scenario) {
       {
         title: '向平台檢舉並要求移除廣告',
         body:
-          '廣告平台知道廣告涉及詐欺時，應移除或停止播送，並把刊登者的資訊提供給司法警察機關。廣告也應揭露委託刊播者與出資者。',
+          '廣告平台知道廣告涉及詐欺時，應移除或停止播送，並把刊登者的資訊提供給司法警察機關。廣告也應揭露委託刊播者與出資者，以及是否使用深偽或 AI 生成的個人影像；沒有揭露的，可以一併檢舉。',
         basis: '詐欺犯罪危害防制條例（條號待核對）',
       },
       {
@@ -100,6 +100,9 @@ function evidenceLines(c) {
   out.push(line('發現時間', c.foundAt));
   if (c.suspect) out.push(`可疑影像檔案 SHA-256：${c.suspect.sha256}`);
   if (c.match) out.push(`比對結果：${c.match.summary}`);
+  const s = c.signals || {};
+  const other = [s.provenance, s.swap, s.ai].filter(Boolean);
+  if (other.length) out.push(`其他線索（輔助，非判定）：${other.join('；')}`);
   return out;
 }
 

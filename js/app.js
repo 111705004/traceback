@@ -418,7 +418,7 @@ async function runSearch() {
       $('search-progress').hidden = false;
       return setLine(
         'search-summary',
-        '目前還不能掃描外部網站：瀏覽器不允許直接讀取別的網站，需要先部署轉送服務。你可以先用內建的測試站試試看，或改用「我自己有截圖」。',
+        '目前沒有接上後端，不能掃描外部網站。可以先用內建的測試站試試看，或改用「我自己有截圖，改用上傳」。',
         'bad',
       );
     }
@@ -470,11 +470,13 @@ async function runSearch() {
       }
       setLine('search-summary', text, 'ok');
     } else {
-      setLine(
-        'search-summary',
-        `看了 ${n} 頁，這次沒有找到用了你照片的內容${stopped}。這只代表這幾頁沒有，不代表其他地方沒有。`,
-        '',
-      );
+      let text = `看了 ${n} 頁，這次沒有找到用了你照片的內容${stopped}。這只代表這幾頁沒有，不代表其他地方沒有。`;
+      // 內建測試站的模擬廣告圖要用成員本人的照片製作，沒放進去時一定找不到
+      const testsite = new URL(TESTSITE_URL, location.href).href.replace(/[^/]+$/, '');
+      if (mode === 'scan' && seeds[0].startsWith(testsite)) {
+        text += '內建測試站的模擬廣告圖要先用本人的照片製作、放進 testsite/img 才找得到（做法見 README）。想看找到的樣子，可以改選「示範：在模擬的網路上找」。';
+      }
+      setLine('search-summary', text, '');
     }
   } catch (err) {
     fail(err);
@@ -818,10 +820,12 @@ async function buildEvidence() {
       changedRatio: b.local.changedRatio === null ? null : Number(b.local.changedRatio.toFixed(4)),
       faceDistance: b.faceDist === null ? null : Number(b.faceDist.toFixed(4)),
     };
+    // 只記下有發現的線索；「沒有發現」不代表什麼，寫進存證紀錄只會造成誤解
+    const prov = state.provenance ? describeProvenance(state.provenance) : null;
     ev.signals = {
-      provenance: state.provenance ? describeProvenance(state.provenance).title : null,
-      swap: state.swap ? (state.swap.found ? '可能經過換臉（五官像本人、臉型不像）' : '沒有看到換臉跡象') : null,
-      ai: state.aiScore === undefined || state.aiScore === null ? null : `疑似 AI 生成分數 ${Math.round(state.aiScore * 100)}/100（偵測模型，僅供參考）`,
+      provenance: prov && prov.level !== 'low' ? prov.title : null,
+      swap: state.swap && state.swap.found ? '可能經過換臉（五官像本人、臉型不像）' : null,
+      ai: state.aiScore === undefined || state.aiScore === null || state.aiScore < 0.5 ? null : `疑似 AI 生成分數 ${Math.round(state.aiScore * 100)}/100（偵測模型，僅供參考）`,
       swapNumbers: state.swap ? { inner: Number(state.swap.inner.toFixed(4)), outer: Number(state.swap.outer.toFixed(4)) } : null,
     };
   }
@@ -946,6 +950,15 @@ function renderAction() {
       setTimeout(() => (btn.textContent = '複製'), 2500);
     });
     box.appendChild(el);
+  }
+
+  // 商業冒用常會一再出現，建議登錄讓民眾查得到本人
+  if (ev.scenario === 'scam' || ev.scenario === 'endorsement') {
+    const tip = document.createElement('div');
+    tip.className = 'callout calm';
+    tip.innerHTML =
+      '<strong>同樣的冒用常會再出現</strong><p>登錄你的官方帳號和「我不會做的事」之後，民眾上傳可疑廣告查證時，會看到「與本人聲明不符」；他們回報的新廣告也會交給你確認。</p><p><a class="file-btn" href="kol.html">去登錄</a></p>';
+    box.appendChild(tip);
   }
 
   const res = [...(ev.scenario === 'intimate' ? RESOURCES.intimate : []), ...RESOURCES.common];
