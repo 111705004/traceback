@@ -135,7 +135,7 @@
         </details>
       </div>
 
-      <p class="note">這是競賽用的原型。開發用：<a href="experiment.html">比對實驗頁</a></p>
+      <p class="note">這是競賽用的原型。團隊工具：<a href="experiment.html">比對實驗</a>、<a href="make-testsite.html">製作測試站廣告</a></p>
     </section>
 
     <!-- 確認本人 -->
@@ -207,7 +207,7 @@
         </div>
       </fieldset>
       <p class="note">原型的限制：這裡只比對證件上的臉，不會讀取證件文字，也無法判斷證件真偽。正式版會改接政府或金融等級的身分驗證。</p>
-      <p><button type="button" class="link" id="id-skip">手邊沒有證件？先用示範模式看看</button></p>
+      <p><button type="button" class="link" id="id-skip">手邊沒有證件？先跳過，只掃描內建的測試站</button></p>
       <div class="row end">
         <button type="button" id="id-back">上一步</button>
         <button type="button" class="primary" id="id-next" disabled>下一步</button>
@@ -222,13 +222,13 @@
       <fieldset class="choices" id="search-mode">
         <legend>要在哪裡找？</legend>
         <div class="choice-grid">
-          <label class="choice"><input type="radio" name="search-mode" value="demo" checked><span class="mark"></span><span class="body"><strong>示範：在模擬的網路上找</strong><small>用你的照片做出幾則模擬假廣告，混進十幾個模擬網頁裡，看系統找不找得到。不會連到真實網站。</small></span></label>
-          <label class="choice"><input type="radio" name="search-mode" value="scan"><span class="mark"></span><span class="body"><strong>掃描我指定的網頁</strong><small>貼上一個網址，系統會檢查那一頁和它連出去的同站網頁。</small></span></label>
+          <label class="choice"><input type="radio" name="search-mode" value="scan" checked><span class="mark"></span><span class="body"><strong>掃描網頁</strong><small>貼上一個網址，系統會讀那一頁和它連出去的同站網頁，一張一張比對圖片。已經幫你填好內建的測試站。</small></span></label>
+          <label class="choice"><input type="radio" name="search-mode" value="demo"><span class="mark"></span><span class="body"><strong>不連網，看看找到時的樣子</strong><small>用你的照片當場做出幾則假廣告，混進模擬的網頁裡，看系統怎麼找。</small></span></label>
         </div>
       </fieldset>
 
       <div id="search-scan-box" hidden>
-        <p class="result-line bad" id="scan-locked" hidden>掃描真實網頁需要先通過證件驗證。你目前在示範模式，可以回上一步補上證件。</p>
+        <p class="result-line bad" id="scan-locked" hidden>掃描其他網站需要先通過證件驗證。你跳過了證件驗證，可以回上一步補上；內建的測試站不需要。</p>
         <div class="grid">
           <label class="field">
             <span>網址</span>
@@ -243,7 +243,7 @@
             </select>
           </label>
         </div>
-        <p class="note" id="scan-note">可以掃描任何公開網頁，也可以先用<button type="button" class="link" id="scan-example">內建的測試站</button>試試看。<span id="scan-limits">需要登入才看得到的內容（例如 Facebook、Instagram、Threads 的大部分頁面、LINE 群組）讀不到；只會往同一個網站裡面找，不會跳到別的網站。</span></p>
+        <p class="note" id="scan-note">可以掃描任何公開網頁，或用<button type="button" class="link" id="scan-example">內建的測試站</button>。<span id="scan-limits">需要登入才看得到的內容（例如 Facebook、Instagram、Threads 的大部分頁面、LINE 群組）讀不到；只會往同一個網站裡面找，不會跳到別的網站。</span></p>
       </div>
 
       <div class="row">

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>製作測試站廣告 · 尋影 TraceBack</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5m0 0-4 4m4-4 4 4M5 19h14"/></symbol>
+  </svg>
+  <header class="top">
+    <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到首頁">
+      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
+      <strong>尋影 TraceBack</strong>
+      <span class="tag">團隊工具</span>
+    </a>
+  </header>
+
+  <main>
+    <section class="view">
+      <h1>製作測試站的模擬廣告</h1>
+      <p class="lead">「幫我找找看」可以掃描真的網頁。為了展示「找到冒用」的樣子，測試站要放三則用成員照片做的模擬廣告。這頁幫你一次做好三張圖。</p>
+
+      <h2>1. 選照片</h2>
+      <p class="note">1 到 3 張同一位成員的照片，臉要清楚。照片只在這台電腦上處理。展示時，這位成員要用同一批照片走「幫我找找看」。</p>
+      <label class="drop" id="drop">
+        <svg class="icon"><use href="#i-upload"/></svg>
+        <strong>選照片，或把照片拖進來</strong>
+        <span id="count">還沒有照片</span>
+        <input type="file" class="vh" id="files" accept="image/*" multiple>
+      </label>
+      <label class="check"><input type="checkbox" id="consent"> 照片裡的人同意這三張模擬廣告公開放在測試站上，圖上會標示「示範用模擬內容」。</label>
+      <div class="row"><button type="button" class="primary" id="make" disabled>做出三張圖</button></div>
+      <p class="result-line" id="make-result"></p>
+
+      <div id="out" hidden>
+        <h2>2. 下載</h2>
+        <ul class="miss-grid" id="previews"></ul>
+        <div class="row"><button type="button" class="primary" id="download">下載三張圖</button></div>
+
+        <h2>3. 放進測試站並推上 GitHub</h2>
+        <ol>
+          <li>把三張圖放進專案的 <code>testsite/img/</code> 資料夾，檔名不要改：<code>ad-teacher.jpg</code>、<code>ad-line.jpg</code>、<code>ad-health.jpg</code>。</li>
+          <li>推上 GitHub（例如在專案資料夾執行 <code>git add testsite/img &amp;&amp; git commit -m "加入測試站模擬廣告" &amp;&amp; git push</code>）。</li>
+          <li>等一兩分鐘網站更新後，用同一位成員的照片走「幫我找找看」，選「掃描我指定的網頁」並按「內建的測試站」，就會找到這三則。</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">尋影 TraceBack｜團隊工具</footer>
+  <script type="module" src="js/make-testsite.js"></script>
+</body>
+</html>

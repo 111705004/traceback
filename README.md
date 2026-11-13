@@ -61,13 +61,21 @@
 
 ## 測試站
 
-`testsite/` 是一組虛構的網頁，給「掃描指定網頁」示範用。其中三頁預留了模擬廣告圖的位置：
+`testsite/` 是一組虛構的網頁，給「幫我找找看」的掃描示範用。搜尋頁預設就是掃描測試站，掃描本站頁面不需要證件驗證。
+
+其中三頁要放用成員照片做的模擬廣告圖，掃描才找得到東西：
 
 - `testsite/img/ad-teacher.jpg`
 - `testsite/img/ad-line.jpg`
 - `testsite/img/ad-health.jpg`
 
-這三個檔案沒有放進儲存庫。要示範時，請用成員本人同意公開的照片自製模擬廣告後放入。做法之一：在示範搜尋的結果上按右鍵另存圖片。
+做法：
+
+1. 打開 `make-testsite.html`（製作測試站廣告），放入 1 到 3 張同一位成員的照片，勾選同意後按「做出三張圖」，再按「下載三張圖」。圖上都會標示「示範用模擬內容」。
+2. 把三張圖放進 `testsite/img/`，檔名不要改，推上 GitHub。
+3. 展示時，用同一位成員的照片走「幫我找找看」，就會從測試站找到這三則。存證紀錄會把來源標成「內建測試站（虛構網頁，示範用）」。
+
+2026/11/14 用範例照片測過：掃描測試站 8 頁、比對 9 張圖，三則都找到並認出改動類型。測試用的圖沒有放進儲存庫。
 
 ## 掃描外部網站
 
@@ -210,6 +218,7 @@ verify.html        民眾查證
 kol.html           本人登錄與管理
 admin.html         審核
 experiment.html    比對實驗頁
+make-testsite.html 製作測試站的三張模擬廣告圖
 css/style.css      樣式與列印版面
 js/app.js          流程控制、自拍與證件驗證、搜尋畫面、存證、文件顯示
 js/matching.js     四層比對與改動區域標示
@@ -225,6 +234,7 @@ js/verify.js       民眾查證
 js/kol.js          本人登錄與管理
 js/admin.js        審核
 js/experiment.js   批次比對與統計
+js/make-testsite.js 製作測試站廣告圖
 js/templates.js    情況分類、法律路徑說明、文件範本
 testsite/          虛構的測試網站
 backend/           後端（Cloudflare Worker + D1），含轉送服務

@@ -287,12 +287,22 @@ function searchRunning() {
   return Boolean(state.search && state.search.running);
 }
 
+// 掃描這個網站自己的頁面（例如內建測試站）不需要證件驗證；掃描其他網站才需要
+function scanNeedsId() {
+  try {
+    return new URL($('scan-url').value.trim(), location.href).origin !== location.origin;
+  } catch (_) {
+    return true;
+  }
+}
+
 function updateSearchForm() {
   const mode = selected('search-mode');
   const scan = mode === 'scan';
   $('search-scan-box').hidden = !scan;
-  $('scan-locked').hidden = !(scan && !state.idVerified);
-  const blocked = scan && (!state.idVerified || !$('scan-url').value.trim());
+  const locked = scan && !state.idVerified && scanNeedsId();
+  $('scan-locked').hidden = !locked;
+  const blocked = scan && (locked || !$('scan-url').value.trim());
   $('search-start').disabled = searchRunning() || blocked;
   $('search-start').hidden = searchRunning();
   $('search-stop').hidden = !searchRunning();
@@ -474,7 +484,7 @@ async function runSearch() {
       // 內建測試站的模擬廣告圖要用成員本人的照片製作，沒放進去時一定找不到
       const testsite = new URL(TESTSITE_URL, location.href).href.replace(/[^/]+$/, '');
       if (mode === 'scan' && seeds[0].startsWith(testsite)) {
-        text += '內建測試站的模擬廣告圖要先用本人的照片製作、放進 testsite/img 才找得到（做法見 README）。想看找到的樣子，可以改選「示範：在模擬的網路上找」。';
+        text += '測試站的三則模擬廣告要用你的照片製作才找得到：到「製作測試站廣告」（make-testsite.html）做好三張圖，放進 testsite/img 推上 GitHub。或改選「不連網，看看找到時的樣子」。';
       }
       setLine('search-summary', text, '');
     }
@@ -783,7 +793,13 @@ async function buildEvidence() {
     scenarioLabel: SCENARIOS[c.scenario].label,
     minor: c.minor,
     displayName: c.displayName,
-    foundBy: hit ? (state.search.mode === 'demo' ? '系統搜尋（示範用的模擬網路，非真實網頁）' : '系統掃描指定網頁') : '本人自行發現',
+    foundBy: hit
+      ? state.search.mode === 'demo'
+        ? '系統搜尋（示範用的模擬網路，非真實網頁）'
+        : hit.page.url.startsWith(new URL(TESTSITE_URL, location.href).href.replace(/[^/]+$/, ''))
+          ? '系統掃描內建測試站（虛構網頁，示範用）'
+          : '系統掃描指定網頁'
+      : '本人自行發現',
     sourceUrl: c.sourceUrl,
     platform: c.platform,
     account: c.account,
@@ -1008,6 +1024,7 @@ function init() {
   renderScenarios();
   renderWeights();
   $('found-at').value = localDateTimeValue();
+  $('scan-url').value = new URL(TESTSITE_URL, location.href).href;
 
   $('help-open').addEventListener('click', () => $('help').showModal());
   $('home-link').addEventListener('click', () => {
@@ -1073,7 +1090,7 @@ function init() {
   $('id-next').addEventListener('click', openSearch);
   $('id-skip').addEventListener('click', () => {
     state.idVerified = false;
-    document.querySelector('input[name="search-mode"][value="demo"]').checked = true;
+    $('scan-url').value = new URL(TESTSITE_URL, location.href).href;
     openSearch();
   });
 
