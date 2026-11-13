@@ -539,6 +539,15 @@ function scene(kind, caption) {
   return c;
 }
 
+// 比對實驗頁也用這幾種改法自動產生改造圖
+export const MOCK_EDITS = [
+  { key: 'banner', label: '加廣告橫幅', make: (src) => adBanner(src) },
+  { key: 'mirror', label: '裁切、翻轉、加濾鏡', make: (src) => adMirror(src) },
+  { key: 'composite', label: '放進商品版面', make: (src) => adComposite(src) },
+  { key: 'repost', label: '縮小轉貼加圖說', make: (src) => repost(src) },
+  { key: 'background', label: '換背景', make: (src, box) => adBackground(src, box) },
+];
+
 function toBlob(canvas) {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86));
 }

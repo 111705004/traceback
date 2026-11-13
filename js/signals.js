@@ -29,8 +29,9 @@ export function renderSignals(list, { provenance, swap }) {
   list.innerHTML = rows.join('');
 }
 
-// 按鈕：下載偵測模型後算「疑似 AI 生成」分數
-export function setupAiButton(button, line, getCanvas) {
+// 按鈕：下載偵測模型後算「疑似 AI 生成」分數。
+// onScore(level, score) 可以回傳一句「下一步」接在結果後面，也可以順便記下分數。
+export function setupAiButton(button, line, getCanvas, onScore) {
   button.addEventListener('click', async () => {
     const canvas = getCanvas();
     if (!canvas) return;
@@ -39,21 +40,22 @@ export function setupAiButton(button, line, getCanvas) {
     line.textContent = '正在下載偵測模型（約 87 MB，第一次需要等一下）';
     try {
       await loadDetector((p) => {
-        if (p.status === 'progress' && p.total) line.textContent = `正在下載偵測模型：${Math.round((p.loaded / p.total) * 100)}%`;
+        if (p.status === 'progress' && p.total > 1_000_000) line.textContent = `正在下載偵測模型：${Math.round((p.loaded / p.total) * 100)}%`;
       });
       line.textContent = '正在計算';
       const score = await aiScore(canvas);
       const level = aiLevel(score);
       const pct = Math.round(score * 100);
+      const next = onScore ? onScore(level, score) || '' : '';
       if (level === 'high') {
         line.className = 'result-line bad';
-        line.textContent = `偵測模型認為很可能是 AI 生成（分數 ${pct}/100）。這類模型很少把真照片誤判成 AI，但仍只是參考。`;
+        line.textContent = `偵測模型認為很可能是 AI 生成（分數 ${pct}/100）。這類模型很少把真照片誤判成 AI，但仍只是參考。${next}`;
       } else if (level === 'mid') {
         line.className = 'result-line';
-        line.textContent = `偵測模型認為有點像 AI 生成（分數 ${pct}/100），無法確定。`;
+        line.textContent = `偵測模型認為有點像 AI 生成（分數 ${pct}/100），無法確定。${next}`;
       } else {
         line.className = 'result-line';
-        line.textContent = `偵測模型沒有發現 AI 生成的跡象（分數 ${pct}/100）。這不代表是真的：廣告常見的縮圖、壓縮、加字會讓這類模型漏掉大部分 AI 圖。`;
+        line.textContent = `偵測模型沒有發現 AI 生成的跡象（分數 ${pct}/100）。這不代表是真的：廣告常見的縮圖、壓縮、加字會讓這類模型漏掉大部分 AI 圖。${next}`;
       }
     } catch (err) {
       console.error(err);

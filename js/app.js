@@ -652,6 +652,7 @@ async function runCompare() {
     }
     state.results.sort((a, b) => b.rank - a.rank);
     state.best = state.results[0];
+    state.aiScore = null;
     setStatus('正在檢查其他線索');
     state.provenance = await readProvenance(state.suspectFile);
     state.swap = await checkSwap(state.best);
@@ -820,6 +821,7 @@ async function buildEvidence() {
     ev.signals = {
       provenance: state.provenance ? describeProvenance(state.provenance).title : null,
       swap: state.swap ? (state.swap.found ? '可能經過換臉（五官像本人、臉型不像）' : '沒有看到換臉跡象') : null,
+      ai: state.aiScore === undefined || state.aiScore === null ? null : `疑似 AI 生成分數 ${Math.round(state.aiScore * 100)}/100（偵測模型，僅供參考）`,
       swapNumbers: state.swap ? { inner: Number(state.swap.inner.toFixed(4)), outer: Number(state.swap.outer.toFixed(4)) } : null,
     };
   }
@@ -848,7 +850,7 @@ function evidenceRows(ev) {
     rows.push(['你的照片的數位指紋（SHA-256）', ev.match.referenceSha256]);
     rows.push(['比對結果', ev.match.summary]);
     const s = ev.signals || {};
-    const other = [s.provenance, s.swap].filter(Boolean).join('；');
+    const other = [s.provenance, s.swap, s.ai].filter(Boolean).join('；');
     if (other) rows.push(['其他線索（輔助，非判定）', other]);
   } else if (ev.minor) {
     rows.push(['影像', '依設計不收取、不保存']);
@@ -984,7 +986,10 @@ function startPath(path) {
 }
 
 function init() {
-  setupAiButton($('ai-run'), $('ai-result'), () => state.suspect?.canvas);
+  setupAiButton($('ai-run'), $('ai-result'), () => state.suspect?.canvas, (level, score) => {
+    state.aiScore = score;
+    return level === 'low' ? '這項不會影響比對結果。' : '下一步：存證紀錄會一起記下這個分數，標示為輔助訊號。';
+  });
   renderScenarios();
   renderWeights();
   $('found-at').value = localDateTimeValue();

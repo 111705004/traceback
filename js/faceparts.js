@@ -120,3 +120,57 @@ export function swapSignal(d, identified) {
   if (!d) return false;
   return d.inner <= (identified ? T.innerClose : T.innerIdentify) && d.outer >= T.outerDiffer;
 }
+
+// ---------- 比對實驗用：自動做一張粗糙的換臉圖 ----------
+
+const center = (pts) => ({ x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length });
+
+// 用兩眼中心與嘴巴中心三個點，算出把 src 的臉對到 dst 的臉的仿射轉換
+function anchor(pos) {
+  return [center(pos.slice(36, 42)), center(pos.slice(42, 48)), center(pos.slice(48, 68))];
+}
+
+function affine(src, dst) {
+  const [a, b, c] = src;
+  const [A, B, C] = dst;
+  const det = a.x * (b.y - c.y) - a.y * (b.x - c.x) + (b.x * c.y - c.x * b.y);
+  const solve = (u, v, w) => [
+    (u * (b.y - c.y) - a.y * (v - w) + (v * c.y - w * b.y)) / det,
+    (a.x * (v - w) - u * (b.x - c.x) + (b.x * w - c.x * v)) / det,
+    (a.x * (b.y * w - c.y * v) - a.y * (b.x * w - c.x * v) + u * (b.x * c.y - c.x * b.y)) / det,
+  ];
+  const [m11, m12, m13] = solve(A.x, B.x, C.x);
+  const [m21, m22, m23] = solve(A.y, B.y, C.y);
+  return [m11, m21, m12, m22, m13, m23];
+}
+
+async function landmarks(canvas) {
+  const faceapi = await loadFace();
+  const found = await faceapi
+    .detectAllFaces(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }))
+    .withFaceLandmarks();
+  return found.sort((a, b) => b.detection.box.area - a.detection.box.area);
+}
+
+// 把 src 畫面上最大那張臉的五官，貼到 dst 畫面上最大那張臉。找不到臉時回傳 null。
+// 這是剪貼，不是真正的 AI 換臉，只用來檢查換臉檢查的機制。
+export async function makeSwap(src, dst) {
+  const [s] = await landmarks(src);
+  const [d] = await landmarks(dst);
+  if (!s || !d) return null;
+  const out = document.createElement('canvas');
+  out.width = dst.width;
+  out.height = dst.height;
+  const g = out.getContext('2d');
+  g.drawImage(dst, 0, 0);
+  const region = hull(d.landmarks.positions.slice(17));
+  const c = center(region);
+  g.save();
+  polygon(g, region.map((p) => ({ x: c.x + (p.x - c.x) * 1.05, y: c.y + (p.y - c.y) * 1.05 })));
+  g.clip();
+  g.filter = 'blur(0.6px)';
+  g.setTransform(...affine(anchor(s.landmarks.positions), anchor(d.landmarks.positions)));
+  g.drawImage(src, 0, 0);
+  g.restore();
+  return out;
+}

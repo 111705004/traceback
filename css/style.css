@@ -603,3 +603,30 @@ footer.foot { text-align: center; color: var(--muted); font-size: 0.8125rem; mar
   .inbox > li { grid-template-columns: 1fr; }
 }
 .accounts-verify .result-line:empty { display: none; }
+
+/* ---------- 比對實驗 ---------- */
+
+.own-list, .miss-grid { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 12px; }
+.own-list li {
+  display: grid;
+  grid-template-columns: 84px 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--surface);
+}
+.own-list img { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; }
+.own-list .field { margin: 0; }
+.miss-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+.miss-grid li { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; background: var(--surface); display: grid; gap: 4px; }
+.miss-grid canvas { width: 100%; height: auto; border-radius: 8px; }
+.miss-grid small { color: var(--muted); font-size: 0.8125rem; line-height: 1.5; }
+#progress-view .bar { margin: 16px 0; }
+@media (max-width: 640px) {
+  .own-list li { grid-template-columns: 64px 1fr; }
+  .own-list img { width: 64px; height: 64px; }
+}
+#tiles { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.copy-box { width: 100%; font: 0.8438rem/1.6 ui-monospace, Menlo, monospace; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px; background: var(--surface); color: var(--text); }

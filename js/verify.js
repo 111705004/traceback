@@ -289,7 +289,14 @@ function init() {
     }
   });
   $('check').addEventListener('click', runCheck);
-  setupAiButton($('ai-run'), $('ai-result'), () => state.canvas);
+  setupAiButton($('ai-run'), $('ai-result'), () => state.canvas, (level) => {
+    if (level === 'low') return '請以上面的查證結果為準。';
+    if (!$('report-wrap').hidden) {
+      setTimeout(() => $('report-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' }), 600);
+      return '下一步：不要加入群組或匯款，把截圖交給本人確認（在下方）。';
+    }
+    return '下一步：不要加入群組或匯款，有疑問請打 165。';
+  });
   $('report-consent').addEventListener('change', (e) => ($('report-send').disabled = !e.target.checked));
   $('report-send').addEventListener('click', sendReport);
   $('again').addEventListener('click', reset);

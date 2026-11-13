@@ -3,105 +3,118 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>比對實驗｜尋影 TraceBack</title>
+  <title>比對實驗 · 尋影 TraceBack</title>
+  <meta name="description" content="放入照片，系統自動做出常見的冒用改造圖，測比對認不認得出來。">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5m0 0-4 4m4-4 4 4M5 19h14"/></symbol>
+  </svg>
+
   <header class="top">
-    <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到主流程">
-      <span class="logo"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg></span>
+    <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到首頁">
+      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
       <strong>尋影 TraceBack</strong>
       <span class="tag">比對實驗</span>
     </a>
-    <a href="index.html">回到主流程</a>
   </header>
 
-  <p class="privacy"><span>所有圖片只在這台裝置的瀏覽器裡處理，不會上傳。</span></p>
-
-  <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>所有圖片只在這台裝置的瀏覽器裡處理，不會上傳。</span></p>
 
   <main>
-    <section class="view">
-      <h1>四層比對的認回率與誤判率</h1>
-      <p class="lead">一次放入原圖、改造圖與對照圖，系統會把每張測試圖和每張原圖都比一次，算出各層方法認回了多少、誤判了多少。</p>
+    <section class="view" id="setup">
+      <h1>測測看：被改過的照片還認得出來嗎？</h1>
+      <p class="lead">放入幾張本人的照片，系統會自動做出詐騙廣告常見的改法（加橫幅、裁切翻轉、放進版面、換背景、換臉等），再用比對找回來源，告訴你認出幾張、哪些認不出來。</p>
 
-      <h2>準備檔案</h2>
-      <ul>
-        <li><strong>原圖</strong>：本人同意使用的照片，檔名隨意，例如 <code>a01.jpg</code>。</li>
-        <li><strong>改造圖</strong>：檔名用「原圖主檔名、兩個底線、處理方式」，例如 <code>a01__加字.jpg</code>、<code>a01__裁切.jpg</code>、<code>a01__AI換背景.png</code>。系統靠檔名知道它來自哪張原圖。</li>
-        <li><strong>對照圖</strong>：不是由任何一張原圖改來的照片，例如同一人的其他照片。用來測誤判。</li>
-      </ul>
-      <p class="note">請不要使用任何不雅影像。用加字、裁切、濾鏡、換背景、換衣服這類無害的處理來代表改造。</p>
-
-      <div class="grid">
-        <div>
-          <label class="file-btn">選擇原圖<input type="file" id="originals" accept="image/*" multiple class="vh"></label>
-          <p class="result-line" id="originals-count">尚未選擇</p>
-        </div>
-        <div>
-          <label class="file-btn">選擇改造圖<input type="file" id="edited" accept="image/*" multiple class="vh"></label>
-          <p class="result-line" id="edited-count">尚未選擇</p>
-        </div>
-        <div>
-          <label class="file-btn">選擇對照圖<input type="file" id="negatives" accept="image/*" multiple class="vh"></label>
-          <p class="result-line" id="negatives-count">尚未選擇，可省略</p>
-        </div>
-      </div>
-      <ul class="warnings" id="warnings"></ul>
-      <label class="check">
-        <input type="checkbox" id="with-ai"> 同時計算「疑似 AI 生成」分數（要另外下載約 87 MB 的模型，每張圖多花一到數秒）
+      <h2>1. 本人的照片 <span class="pill">必填</span></h2>
+      <p class="note">1 到 10 張，臉清楚的最好。請用本人同意使用的照片，不要用不雅影像。</p>
+      <label class="drop" id="orig-drop">
+        <svg class="icon"><use href="#i-upload"/></svg>
+        <strong>選照片，或把照片拖進來</strong>
+        <span id="orig-count">還沒有照片</span>
+        <input type="file" class="vh" id="orig-files" accept="image/*" multiple>
       </label>
-      <div class="row">
+      <ul class="thumbs" id="orig-list"></ul>
+
+      <h2>2. 別人的照片 <span class="pill">選填，建議放</span></h2>
+      <p class="note">用來測兩件事：會不會把別人誤認成本人，以及自動換臉（把本人的五官貼到別人臉上）抓不抓得到。</p>
+      <label class="drop" id="other-drop">
+        <svg class="icon"><use href="#i-upload"/></svg>
+        <strong>選照片，或把照片拖進來</strong>
+        <span id="other-count">還沒有照片</span>
+        <input type="file" class="vh" id="other-files" accept="image/*" multiple>
+      </label>
+      <ul class="thumbs" id="other-list"></ul>
+
+      <h2>3. 你自己做的改造圖 <span class="pill">選填</span></h2>
+      <p class="note">例如用 AI 工具把本人照片換背景、換衣服、換臉、重繪。這是最能證明效果的一組。每張圖選它是從哪張原圖改來的。</p>
+      <label class="drop" id="own-drop">
+        <svg class="icon"><use href="#i-upload"/></svg>
+        <strong>選圖片，或把圖片拖進來</strong>
+        <span id="own-count">還沒有圖片</span>
+        <input type="file" class="vh" id="own-files" accept="image/*" multiple>
+      </label>
+      <ul class="own-list" id="own-list"></ul>
+
+      <label class="check"><input type="checkbox" id="with-ai"> 也算「疑似 AI 生成」分數（第一次要下載約 87 MB 的模型）</label>
+
+      <p class="result-line" id="plan"></p>
+      <div class="row end">
         <button type="button" class="primary" id="run" disabled>開始實驗</button>
       </div>
     </section>
 
+    <section class="view" id="progress-view" hidden>
+      <h1>實驗中</h1>
+      <p id="step-text">準備中</p>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><span id="step-bar"></span></div>
+      <p class="note">請讓這個分頁保持在前景，切到別的分頁會變慢。</p>
+    </section>
+
     <section class="view" id="results" hidden>
-      <h1>結果</h1>
-      <p id="overview"></p>
+      <h1>實驗結果</h1>
+      <div class="stats" id="tiles"></div>
+      <ul class="findings" id="conclusions"></ul>
 
-      <h2>各層的認回率與誤判率</h2>
-      <div class="scroll"><table class="layers" id="summary"></table></div>
-      <ul class="note">
-        <li>認回率：改造圖與它真正的原圖比對時，達到該等級的比例。越高越好。</li>
-        <li>對照圖誤判率：對照圖至少被判定與一張原圖相符的比例。越低越好。</li>
-        <li>配錯原圖：改造圖與「不是它來源」的原圖比對時，被判定相符的比例。越低越好。</li>
-        <li>如果原圖都是同一個人，人臉相似度的誤判率與配錯率偏高是正常的：它認的是人，不是照片。</li>
-      </ul>
-
-      <h2>依處理方式</h2>
+      <h2>每種改法的結果</h2>
       <div class="scroll"><table class="layers" id="by-type"></table></div>
-      <p class="note">數字是認回率，含「部分相符」。</p>
+      <p class="note">「認出來源」是比對判定這張圖來自它真正的原圖。「判成的改動」是系統說明它被動了什麼手腳，可以和實際的改法對照看準不準。</p>
 
-      <h2>數值分布</h2>
-      <div class="scroll"><table class="layers" id="spread"></table></div>
-      <p class="note">拿「應該相符」的最差值和「不該相符」的最好值相比，可以看出門檻該設在哪裡。兩者重疊就表示這一層單獨分不開。</p>
-
-      <h2>改動類型的判斷</h2>
-      <div class="scroll"><table class="layers" id="edit-types"></table></div>
-      <p class="note">每種處理方式的改造圖，各有幾張被判斷成哪些改動類型。一張圖可以同時有好幾種。拿它和你實際做的處理對照，就知道判斷準不準；例如「換背景」的圖應該落在「背景或身體被換掉」。</p>
-
-      <div id="ai-section" hidden>
-        <h2>疑似 AI 生成分數</h2>
-        <div class="scroll"><table class="layers" id="ai-table"></table></div>
-        <ul class="note">
-          <li>分數介於 0 到 1，越高代表模型越覺得這張圖是 AI 生成的。這是沒有原圖可對照時的猜測，不是事實。</li>
-          <li>原圖與對照圖都是真的照片，分數應該要低；被判為疑似的比例就是誤報率。</li>
-          <li>用 AI 工具改過的圖分數應該要高；只有加字、裁切、濾鏡的圖，照片本身仍是真的，分數低是合理的。</li>
-          <li>模型只看畫面中央的正方形區域。</li>
-        </ul>
+      <div id="ai-wrap" hidden>
+        <h2>疑似 AI 生成分數怎麼看</h2>
+        <ul class="findings" id="ai-findings"></ul>
       </div>
 
-      <h2>沒有被認回的改造圖</h2>
-      <div class="scroll"><table class="layers" id="misses"></table></div>
+      <div id="misses-wrap" hidden>
+        <h2>沒認出來、或沒標出換臉的圖</h2>
+        <ul class="miss-grid" id="misses"></ul>
+      </div>
 
+      <details class="more">
+        <summary>給調門檻用：各層方法與數值分布</summary>
+        <div class="inner">
+          <div class="scroll"><table class="layers" id="layers"></table></div>
+          <div class="scroll"><table class="layers" id="spread"></table></div>
+          <p class="note">拿「應該相符」的最差值和「不該相符」的最好值相比，看門檻該設在哪裡。目前的門檻：<span id="thresholds"></span></p>
+        </div>
+      </details>
+
+      <h2>下一步</h2>
+      <ul class="findings" id="next-steps"></ul>
       <div class="row">
-        <button type="button" class="primary" id="download-csv">下載全部配對的數值</button>
-        <button type="button" id="copy-summary">複製摘要表格</button>
+        <button type="button" class="primary" id="copy">複製結果，貼到企劃書</button>
+        <button type="button" id="csv">下載全部數值（CSV）</button>
+        <button type="button" id="again">換一組照片再測</button>
       </div>
-      <p class="note">下載的檔案包含每一組配對的原始數值，可以用試算表重新試不同的門檻。目前使用的門檻：<span id="thresholds"></span></p>
+      <p class="result-line" id="copy-result"></p>
+      <textarea id="copy-box" class="copy-box" rows="10" readonly hidden aria-label="實驗結果文字"></textarea>
     </section>
   </main>
+
+  <footer class="foot">尋影 TraceBack｜比對實驗</footer>
 
   <script type="module" src="js/experiment.js"></script>
 </body>
