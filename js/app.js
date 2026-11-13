@@ -1,6 +1,6 @@
 import * as M from './matching.js';
 import * as S from './search.js';
-import { TESTSITE_URL } from './config.js';
+import { TESTSITE_URL, PROXY_URL } from './config.js';
 import { SCENARIOS, legalPath, buildDocuments, RESOURCES } from './templates.js';
 import { explainEdit } from './edits.js';
 import { faceParts, partDistances, swapSignal } from './faceparts.js';
@@ -986,6 +986,8 @@ function startPath(path) {
 }
 
 function init() {
+  // 沒有接上後端時，只能掃描這個網站自己的頁面
+  if (!PROXY_URL) $('scan-limits').textContent = '目前沒有接上後端，只能掃描這個網站自己的頁面。';
   setupAiButton($('ai-run'), $('ai-result'), () => state.suspect?.canvas, (level, score) => {
     state.aiScore = score;
     return level === 'low' ? '這項不會影響比對結果。' : '下一步：存證紀錄會一起記下這個分數，標示為輔助訊號。';

@@ -236,7 +236,21 @@ export function httpWeb() {
         seenImages.add(u.href);
         images.push({ url: u.href, alt: clean(alt), load: () => loadImage(u.href) });
       };
-      for (const img of doc.querySelectorAll('img[src]')) addImage(img.getAttribute('src'), img.getAttribute('alt'));
+      // 很多網站的圖片是延遲載入的：真正的網址放在 data-src、data-original 或 srcset
+      const fromSrcset = (v) => {
+        const items = String(v || '').split(',').map((x) => x.trim().split(/\s+/)[0]).filter(Boolean);
+        return items[items.length - 1] || '';
+      };
+      for (const img of doc.querySelectorAll('img')) {
+        const src =
+          img.getAttribute('data-src') ||
+          img.getAttribute('data-original') ||
+          img.getAttribute('data-lazy-src') ||
+          fromSrcset(img.getAttribute('data-srcset') || img.getAttribute('srcset')) ||
+          img.getAttribute('src');
+        if (src && !src.startsWith('data:')) addImage(src, img.getAttribute('alt'));
+      }
+      for (const source of doc.querySelectorAll('picture source[srcset]')) addImage(fromSrcset(source.getAttribute('srcset')), '');
       const og = doc.querySelector('meta[property="og:image"]');
       if (og && og.content) addImage(og.content, '');
 

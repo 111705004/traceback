@@ -236,7 +236,7 @@
             </select>
           </label>
         </div>
-        <p class="note">原型的限制：瀏覽器不能直接讀取別的網站，目前只能掃描這個網站自己的頁面，例如<button type="button" class="link" id="scan-example">內建的測試站</button>。要掃描外部網站，需要先部署後端（<code>backend/</code>）並在 <code>js/config.js</code> 填上位址。</p>
+        <p class="note" id="scan-note">可以掃描任何公開網頁，也可以先用<button type="button" class="link" id="scan-example">內建的測試站</button>試試看。<span id="scan-limits">需要登入才看得到的內容（例如 Facebook、Instagram、Threads 的大部分頁面、LINE 群組）讀不到；只會往同一個網站裡面找，不會跳到別的網站。</span></p>
       </div>
 
       <div class="row">
