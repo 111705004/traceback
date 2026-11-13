@@ -32,7 +32,7 @@
     <button type="button" class="help-btn" id="help-open"><svg class="icon"><use href="#i-help"/></svg>需要協助</button>
   </header>
 
-  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>你的照片和證據只留在這台裝置上，不會上傳到任何地方。</span></p>
+  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>比對你的照片時，照片和證據只留在這台裝置上，不會上傳。</span></p>
 
   <div class="progress" id="progress" hidden>
     <div class="progress-text"><span id="progress-count"></span><strong id="progress-name"></strong></div>
@@ -46,12 +46,11 @@
     <section id="home" class="view">
       <div class="hero">
         <div>
-          <h1>發現自己的臉被拿去用了？<br>別慌，我們一步一步來。</h1>
-          <p class="lead">不管是詐騙廣告、假代言，還是被改造過的照片，這裡幫你確認它是不是從你的照片來的、把證據留下來，並準備好檢舉和報案要用的文字。</p>
+          <h1>臉被盜用，或看到可疑的代言？</h1>
+          <p class="lead">選一個最符合你的情況就好。</p>
           <ul class="chips">
-            <li><svg class="icon"><use href="#i-lock"/></svg>照片不離開你的裝置</li>
-            <li><svg class="icon"><use href="#i-clock"/></svg>大約十分鐘</li>
-            <li><svg class="icon"><use href="#i-heart"/></svg>免費，不用註冊</li>
+            <li><svg class="icon"><use href="#i-heart"/></svg>免費</li>
+            <li><svg class="icon"><use href="#i-lock"/></svg>照片在你的裝置上比對</li>
           </ul>
         </div>
         <svg class="hero-art" viewBox="0 0 200 200" role="img" aria-label="一張照片被放大鏡檢視">
@@ -69,44 +68,52 @@
         </svg>
       </div>
 
-      <div class="paths">
-        <article class="card">
-          <span class="badge"><svg class="icon"><use href="#i-eye"/></svg></span>
-          <h2>我已經看到那則內容了</h2>
-          <p>手上有截圖或連結。上傳之後，我們幫你找出它用了你的哪張照片、哪裡被改過。</p>
-          <button type="button" class="primary" id="start-known">從這裡開始</button>
-        </article>
-        <article class="card">
-          <span class="badge"><svg class="icon"><use href="#i-search"/></svg></span>
-          <h2>我想知道有沒有人在用我的照片</h2>
-          <p>還沒看到，但擔心被盜用。從你的照片出發，幫你找找看。需要多一道證件驗證。</p>
-          <button type="button" class="primary" id="start-find">幫我找找看</button>
-        </article>
-      </div>
-
-      <h2>也可以這樣用</h2>
-      <div class="paths">
-        <article class="card">
+      <h2 class="vh-title" id="role-title">你是哪一種情況？</h2>
+      <div class="roles" role="group" aria-labelledby="role-title">
+        <a class="role" href="verify.html">
           <span class="badge"><svg class="icon"><use href="#i-shield"/></svg></span>
-          <h2>我看到一則廣告，想確認是不是本人</h2>
-          <p>有人推薦投資、邀你進 LINE 群組或私訊你？上傳截圖，看看是不是本人、跟本人的聲明符不符。不用註冊。</p>
-          <a class="file-btn primary" href="verify.html">查證代言</a>
-        </article>
-        <article class="card">
-          <span class="badge"><svg class="icon"><use href="#i-id"/></svg></span>
-          <h2>我常被冒用，想讓民眾查得到我</h2>
-          <p>登錄你的臉、官方帳號和「我不會做的事」。民眾查證時會看到你的聲明，他們回報的可疑內容也會交給你確認。</p>
-          <a class="file-btn" href="kol.html">本人登錄</a>
-        </article>
+          <span class="role-text">
+            <strong>我看到可疑的廣告或帳號</strong>
+            <span>有人用老師、醫師或名人的名義推薦投資、邀你進 LINE 群組。上傳截圖，查是不是本人。</span>
+          </span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <button type="button" class="role" id="role-victim" aria-expanded="false" aria-controls="victim-options">
+          <span class="badge"><svg class="icon"><use href="#i-eye"/></svg></span>
+          <span class="role-text">
+            <strong>我的照片被冒用了，或擔心被冒用</strong>
+            <span>留下證據、準備檢舉文字，或讓民眾查得到你。</span>
+          </span>
+          <span class="go" aria-hidden="true">›</span>
+        </button>
       </div>
 
-      <h2>會做哪些事</h2>
-      <ol class="how">
-        <li><strong>確認是你本人</strong><span>拍一張自拍，確保只有你能查自己的照片。</span></li>
-        <li><strong>比對照片</strong><span>找出可疑內容用了你的哪張照片，標出被改過的地方。</span></li>
-        <li><strong>留下證據</strong><span>記下時間、來源和檔案的數位指紋，存成一份報告。</span></li>
-        <li><strong>告訴你下一步</strong><span>檢舉、通報、報案怎麼做，文字都先幫你寫好。</span></li>
-      </ol>
+      <div id="victim-options" class="victim-options" hidden>
+        <h2>你現在的情況是？</h2>
+        <div class="options">
+          <button type="button" class="option" id="start-known">
+            <span class="option-text">
+              <strong>我已經看到那則內容 <span class="pill high">最常用</span></strong>
+              <span>手上有截圖或連結。找出它用了你哪張照片、哪裡被改過，留下證據並寫好檢舉文字。約 10 分鐘。</span>
+            </span>
+            <span class="go" aria-hidden="true">›</span>
+          </button>
+          <button type="button" class="option" id="start-find">
+            <span class="option-text">
+              <strong>還沒看到，想找找看哪裡在用我的照片</strong>
+              <span>系統幫你掃描網頁、比對你的照片。因為會主動搜尋，需要多一道證件驗證。</span>
+            </span>
+            <span class="go" aria-hidden="true">›</span>
+          </button>
+          <a class="option" href="kol.html">
+            <span class="option-text">
+              <strong>讓民眾查得到我，有人冒用時通知我</strong>
+              <span>登錄你的官方帳號和「我不會做的事」。民眾查證時會看到你的聲明，可疑內容會交給你確認。適合常被冒用的人。</span>
+            </span>
+            <span class="go" aria-hidden="true">›</span>
+          </a>
+        </div>
+      </div>
 
       <h2>常見問題</h2>
       <div class="faq">

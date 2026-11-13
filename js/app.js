@@ -1002,6 +1002,14 @@ function init() {
     if (searchRunning()) state.search.controller.abort();
     show('home');
   });
+  // 首頁：先選身分，選「照片被冒用」才展開三個細項
+  $('role-victim').addEventListener('click', () => {
+    const panel = $('victim-options');
+    const open = panel.hidden;
+    panel.hidden = !open;
+    $('role-victim').setAttribute('aria-expanded', String(open));
+    if (open) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
   $('start-known').addEventListener('click', () => startPath('known'));
   $('start-find').addEventListener('click', () => startPath('find'));
 
