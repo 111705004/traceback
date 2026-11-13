@@ -1,7 +1,7 @@
 // 後端（backend/）的位址。部署後把 PRODUCTION_API_URL 換成 Worker 的網址，例如
 // 'https://traceback-api.你的帳號.workers.dev'，結尾不要加斜線。
 // 在自己的電腦上開發時，自動連到 npm run dev 啟動的本機後端。
-const PRODUCTION_API_URL = '';
+const PRODUCTION_API_URL = 'https://traceback-api.traceback-nextwave.workers.dev';
 const LOCAL = location.hostname === 'localhost';
 export const API_URL = LOCAL ? 'http://localhost:8787' : PRODUCTION_API_URL;
 

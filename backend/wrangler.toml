@@ -10,7 +10,7 @@ ALLOWED_ORIGINS = "https://111705004.github.io,http://localhost:8765"
 [[d1_databases]]
 binding = "DB"
 database_name = "traceback"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "110dc818-33ed-4f66-bde7-28ab913d55fb"
 
 # 每天清理過期的回報圖片
 [triggers]
