@@ -48,6 +48,9 @@
         </div>
       </div>
       <ul class="warnings" id="warnings"></ul>
+      <label class="check">
+        <input type="checkbox" id="with-ai"> 同時計算「疑似 AI 生成」分數（要另外下載約 87 MB 的模型，每張圖多花一到數秒）
+      </label>
       <div class="row">
         <button type="button" class="primary" id="run" disabled>開始實驗</button>
       </div>
@@ -73,6 +76,21 @@
       <h2>數值分布</h2>
       <div class="scroll"><table class="layers" id="spread"></table></div>
       <p class="note">拿「應該相符」的最差值和「不該相符」的最好值相比，可以看出門檻該設在哪裡。兩者重疊就表示這一層單獨分不開。</p>
+
+      <h2>改動類型的判斷</h2>
+      <div class="scroll"><table class="layers" id="edit-types"></table></div>
+      <p class="note">每種處理方式的改造圖，各有幾張被判斷成哪些改動類型。一張圖可以同時有好幾種。拿它和你實際做的處理對照，就知道判斷準不準；例如「換背景」的圖應該落在「背景或身體被換掉」。</p>
+
+      <div id="ai-section" hidden>
+        <h2>疑似 AI 生成分數</h2>
+        <div class="scroll"><table class="layers" id="ai-table"></table></div>
+        <ul class="note">
+          <li>分數介於 0 到 1，越高代表模型越覺得這張圖是 AI 生成的。這是沒有原圖可對照時的猜測，不是事實。</li>
+          <li>原圖與對照圖都是真的照片，分數應該要低；被判為疑似的比例就是誤報率。</li>
+          <li>用 AI 工具改過的圖分數應該要高；只有加字、裁切、濾鏡的圖，照片本身仍是真的，分數低是合理的。</li>
+          <li>模型只看畫面中央的正方形區域。</li>
+        </ul>
+      </div>
 
       <h2>沒有被認回的改造圖</h2>
       <div class="scroll"><table class="layers" id="misses"></table></div>

@@ -2,6 +2,7 @@ import * as M from './matching.js';
 import * as S from './search.js';
 import { TESTSITE_URL } from './config.js';
 import { SCENARIOS, legalPath, buildDocuments, RESOURCES } from './templates.js';
+import { explainEdit } from './edits.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) =>
@@ -88,13 +89,6 @@ function localDateTimeValue(d = new Date()) {
 function selected(name) {
   const el = document.querySelector(`input[name="${name}"]:checked`);
   return el ? el.value : null;
-}
-
-// 把改動面積說成一般人看得懂的話。
-function changedText(ratio) {
-  if (ratio === null) return '';
-  if (ratio < 0.02) return '照片本身幾乎沒有被改動';
-  return `大約 ${Math.round(ratio * 100)}% 的地方被改過`;
 }
 
 function setLine(id, text, kind) {
@@ -207,7 +201,17 @@ async function addReferences(files) {
       } else if (dist > M.THRESHOLDS.faceSame) {
         reject('沒有加入：和自拍不是同一張臉');
       } else {
-        const ref = { name: file.name, canvas, faces, hash: M.pHash(canvas), embedding: null, sha256: await sha256(file) };
+        // 合照裡可能不只一張臉，記下哪一張是本人，判斷臉部有沒有被改時要用
+        const dists = faces.map((f) => M.faceDistance(state.selfie, f));
+        const ref = {
+          name: file.name,
+          canvas,
+          faces,
+          faceIndex: dists.indexOf(Math.min(...dists)),
+          hash: M.pHash(canvas),
+          embedding: null,
+          sha256: await sha256(file),
+        };
         state.refs.push(ref);
         stateEl.textContent = '已加入';
         stateEl.className = 'state ok';
@@ -336,7 +340,7 @@ function renderHit(hit) {
   $('hits-wrap').hidden = false;
   const li = document.createElement('li');
   const b = hit.best;
-  const changed = b.local.changedRatio === null ? '' : `，${changedText(b.local.changedRatio)}`;
+  const how = explainEdit(b.edit);
   const pics = document.createElement('div');
   pics.className = 'hit-pics';
   const fig = (canvas, cap) => {
@@ -352,7 +356,7 @@ function renderHit(hit) {
   li.appendChild(pics);
   const p = document.createElement('p');
   p.className = 'hit-text';
-  p.innerHTML = `<strong>${HIT_TEXT[b.verdict]}</strong>${b.verdict === 'face-only' ? '' : esc(changed)}${b.mirrored ? '，而且被左右翻轉' : ''}。<small>出現在：${esc(hit.page.title)}（${esc(hit.page.platform || '')}）</small><small>${esc(state.search.web.label(hit.page.url))}</small>`;
+  p.innerHTML = `<strong>${HIT_TEXT[b.verdict]}</strong>。${how.labels && b.verdict !== 'face-only' ? `<small>被動的手腳：${esc(how.labels)}</small>` : ''}<small>出現在：${esc(hit.page.title)}（${esc(hit.page.platform || '')}）</small><small>${esc(state.search.web.label(hit.page.url))}</small>`;
   li.appendChild(p);
   const row = document.createElement('div');
   row.className = 'row';
@@ -398,7 +402,7 @@ async function runSearch() {
   if (mode === 'demo') {
     web = S.simulatedWeb(state.refs);
     seeds = web.seeds;
-    maxPages = 10;
+    maxPages = 11;
   } else {
     let url;
     try {
@@ -593,13 +597,13 @@ function readCase() {
 
 function verdictContent(b) {
   const n = b.index + 1;
-  const changed = b.local.changedRatio === null ? '' : `${changedText(b.local.changedRatio)}。`;
-  const mirrored = b.mirrored ? '這張圖還被左右翻轉過。' : '';
+  const headline = explainEdit(b.edit).headline;
+  const how = headline ? `${headline}。` : '';
   switch (b.verdict) {
     case 'derived':
-      return ['alert', 'strong', '這張圖是從你的照片來的', `它和你的第 ${n} 張照片對得上。${changed}${mirrored}`];
+      return ['alert', 'strong', '這張圖是從你的照片來的', `它和你的第 ${n} 張照片對得上。${how}`];
     case 'likely':
-      return ['alert', 'likely', '這張圖很可能是從你的照片來的', `它和你的第 ${n} 張照片有不少地方對得上。${changed}${mirrored}`];
+      return ['alert', 'likely', '這張圖很可能是從你的照片來的', `它和你的第 ${n} 張照片有不少地方對得上。${how}`];
     case 'face-only':
       return [
         'help',
@@ -681,6 +685,13 @@ function renderResult() {
   v.className = `verdict ${cls}`;
   v.innerHTML = `${icon(iconName)}<div><strong>${esc(title)}</strong><p>${esc(body)}</p></div>`;
 
+  // 被動了什麼手腳
+  const how = explainEdit(b.edit);
+  $('edits-wrap').hidden = !how.items.length;
+  $('edits').innerHTML = how.items
+    .map((i) => `<li class="${i.tag === 'face-intact' || i.tag === 'identical' ? 'calm' : ''}"><strong>${esc(i.label)}</strong>${esc(i.text)}</li>`)
+    .join('');
+
   const box = $('compare');
   box.appendChild(figure(copyCanvas(b.ref.canvas), `你的第 ${b.index + 1} 張照片`, b.ref.name, false));
   box.appendChild(figure(copyCanvas(state.suspect.canvas), '可疑的圖', state.suspectFile.name, blur));
@@ -721,7 +732,9 @@ function matchSummary() {
     const changed =
       b.local.changedRatio === null ? '' : `，約 ${Math.round(b.local.changedRatio * 100)}% 的區域經改動`;
     const mirrored = b.mirrored ? '，且經左右翻轉' : '';
-    return `與本人的參考照「${b.ref.name}」相符（${b.local.inliers} 組特徵點通過幾何驗證${changed}${mirrored}）；${confirmText}`;
+    const labels = explainEdit(b.edit).labels;
+    const how = labels ? `；自動判斷的改動類型：${labels}` : '';
+    return `與本人的參考照「${b.ref.name}」相符（${b.local.inliers} 組特徵點通過幾何驗證${changed}${mirrored}）${how}；${confirmText}`;
   }
   return `自動比對未能確認來源；${confirmText}`;
 }
@@ -766,6 +779,14 @@ async function buildEvidence() {
       localMatches: b.local.good,
       localInliers: b.local.inliers,
       mirrored: b.mirrored,
+      editTags: b.edit.tags,
+      editLabels: explainEdit(b.edit).labels,
+      editNumbers: {
+        coverage: b.edit.coverage,
+        referenceUsed: b.edit.refUsed,
+        changedInFace: b.edit.changedInFace,
+        changedOutsideFace: b.edit.changedOutsideFace,
+      },
       changedRatio: b.local.changedRatio === null ? null : Number(b.local.changedRatio.toFixed(4)),
       faceDistance: b.faceDist === null ? null : Number(b.faceDist.toFixed(4)),
     };

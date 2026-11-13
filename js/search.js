@@ -300,13 +300,13 @@ function text(ctx, str, x, y, size, color, weight = 700, align = 'left') {
 }
 
 // 每張模擬圖都加上標記，避免截圖流出後被誤認為真實廣告。
-function watermark(ctx, w, h) {
+function watermark(ctx, w, h, top = 6) {
   const label = '示範用模擬內容';
   ctx.font = `600 13px ${FONT}`;
   const tw = ctx.measureText(label).width + 14;
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
-  ctx.fillRect(w - tw - 6, 6, tw, 22);
-  text(ctx, label, w - 13, 17, 13, '#fff', 600, 'right');
+  ctx.fillRect(w - tw - 6, top, tw, 22);
+  text(ctx, label, w - 13, top + 11, 13, '#fff', 600, 'right');
 }
 
 // 模擬廣告一：整張照片加上橫幅與標章。
@@ -392,8 +392,55 @@ function repost(src) {
   ctx.fillStyle = '#263238';
   ctx.fillRect(0, 0, c.width, c.height);
   ctx.drawImage(src, 0, 0, 420, ph);
-  text(ctx, '理財達人的十句話', 210, ph + 23, 18, '#fff', 700, 'center');
-  watermark(ctx, c.width, ph);
+  text(ctx, '理財達人的十句話', 12, ph + 23, 18, '#fff', 700);
+  // 標記放在圖說列，不蓋到照片，這樣照片本身確實沒有被改動
+  watermark(ctx, c.width, c.height, ph + 12);
+  return c;
+}
+
+// 模擬廣告四：只留下臉與上半身，背景整個換掉。用來示範「換背景」這種肉眼不容易確認來源的改法。
+function adBackground(src, box) {
+  const scale = Math.min(1, 560 / Math.max(src.width, src.height));
+  const w = Math.round(src.width * scale);
+  const h = Math.round(src.height * scale);
+  const c = newCanvas(w, h);
+  const ctx = c.getContext('2d');
+  // 新的背景：深色漸層加上走勢線與長條
+  const g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, '#1a237e');
+  g.addColorStop(1, '#00838f');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let i = 0; i <= 10; i++) {
+    const x = (w / 10) * i;
+    const y = h * (0.75 - 0.05 * i + (i % 2 ? 0.06 : -0.03));
+    if (i) ctx.lineTo(x, y);
+    else ctx.moveTo(x, y);
+  }
+  ctx.stroke();
+  for (let i = 0; i < 9; i++) {
+    ctx.fillStyle = i % 3 ? 'rgba(129, 212, 250, 0.5)' : 'rgba(255, 213, 79, 0.6)';
+    const bh = h * (0.1 + 0.03 * ((i * 5) % 7));
+    ctx.fillRect(w * (0.04 + 0.105 * i), h - bh, w * 0.06, bh);
+  }
+  // 人物：以臉為中心的橢圓範圍，邊緣漸淡
+  const person = newCanvas(w, h);
+  const pc = person.getContext('2d');
+  pc.drawImage(src, 0, 0, w, h);
+  const b = box || { x: src.width * 0.3, y: src.height * 0.15, width: src.width * 0.4, height: src.height * 0.4 };
+  pc.globalCompositeOperation = 'destination-in';
+  pc.translate((b.x + b.width / 2) * scale, (b.y + b.height * 0.8) * scale);
+  pc.scale(b.width * 1.05 * scale, b.height * 1.6 * scale);
+  const fade = pc.createRadialGradient(0, 0, 0.8, 0, 0, 1);
+  fade.addColorStop(0, 'rgba(0, 0, 0, 1)');
+  fade.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  pc.fillStyle = fade;
+  pc.fillRect(-1000, -1000, 2000, 2000);
+  ctx.drawImage(person, 0, 0);
+  watermark(ctx, w, h);
   return c;
 }
 
@@ -511,6 +558,10 @@ function simImage(id, alt, make) {
 
 export function simulatedWeb(refs) {
   const ref = (i) => refs[i % refs.length].canvas;
+  const refFaceBox = (i) => {
+    const r = refs[i % refs.length];
+    return M.faceBoxes(r.canvas)[r.faceIndex ?? 0] || null;
+  };
   const pages = new Map();
   const add = (id, p) => pages.set(`sim://${id}`, { url: `sim://${id}`, links: [], images: [], account: '', advertiser: '', hint: null, planted: false, ...p });
   const link = (id, textStr, sponsored = false) => ({ url: `sim://${id}`, text: textStr, sponsored });
@@ -527,6 +578,7 @@ export function simulatedWeb(refs) {
       link('travel', '花東三日遊'),
       link('shop', '3C 購物節｜限時免運'),
       link('ad-teacher', '財經老師親授：飆股名單免費領', true),
+      link('ad-course', '名師線上課程，限時免費試聽', true),
     ],
   });
   add('feed', {
@@ -563,7 +615,7 @@ export function simulatedWeb(refs) {
   });
   add('stock', { title: '今日大盤分析', platform: '模擬社群平台', images: [pic('stock', 'chart', '大盤走勢')] });
 
-  // 以下四頁放了用使用者照片做的模擬內容
+  // 以下五頁放了用使用者照片做的模擬內容
   add('ad-teacher', {
     title: '財經老師親授：飆股名單免費領',
     platform: '模擬社群平台的贊助廣告',
@@ -590,6 +642,15 @@ export function simulatedWeb(refs) {
     hint: 'endorsement',
     planted: true,
     images: [simImage('ad-health', '名人真心推薦', () => adComposite(ref(2)))],
+  });
+  add('ad-course', {
+    title: '名師線上課程，限時免費試聽',
+    platform: '模擬影音平台的贊助廣告',
+    account: '財富學堂（模擬頻道）',
+    advertiser: '模擬廣告主 C',
+    hint: 'scam',
+    planted: true,
+    images: [simImage('ad-course', '名師線上課程', () => adBackground(ref(4), refFaceBox(4)))],
   });
   add('quotes', {
     title: '名人語錄：理財達人的十句話',

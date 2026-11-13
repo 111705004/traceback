@@ -433,6 +433,11 @@ details.more > .inner { padding: 0 16px 14px; }
 .compare .blurred canvas { filter: blur(18px); }
 .compare .reveal { margin-top: 6px; }
 
+.findings { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 8px; }
+.findings li { border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 9px 14px; font-size: 0.9375rem; }
+.findings li.calm { border-color: var(--ok-line); background: var(--ok-soft); }
+.findings strong { display: block; }
+
 table.layers { width: 100%; border-collapse: collapse; font-size: 0.9375rem; margin: 12px 0; }
 table.layers th, table.layers td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 table.layers th { color: var(--muted); font-weight: 600; font-size: 0.8125rem; }

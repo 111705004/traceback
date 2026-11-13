@@ -1,5 +1,7 @@
 // 批次比對實驗：每張測試圖對每張原圖都跑四層比對，統計認回率與誤判率。
 import * as M from './matching.js';
+import { loadDetector, aiScore, AI_THRESHOLDS } from './aidetect.js';
+import { EDIT_LABELS } from './edits.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) =>
@@ -8,6 +10,7 @@ const esc = (s) =>
 const files = { originals: [], edited: [], negatives: [] };
 let pairs = []; // 每一組配對的原始數值
 let summaryRows = [];
+let aiRows = []; // 每張圖的「疑似 AI 生成」分數；沒有勾選時是空的
 
 const LAYERS = [
   { key: 'hash', name: '1 感知雜湊' },
@@ -68,14 +71,23 @@ async function run() {
   $('run').disabled = true;
   $('results').hidden = true;
   pairs = [];
+  aiRows = [];
+  const withAi = $('with-ai').checked;
   try {
     setStatus('正在載入模型，第一次需要下載，請稍候');
     await Promise.all([M.loadEmbedder(), M.loadFace(), M.loadOpenCV()]);
+    if (withAi) {
+      setStatus('正在載入 AI 生成偵測模型，約 87 MB，第一次需要下載');
+      await loadDetector();
+    }
 
     const originals = [];
     for (let i = 0; i < files.originals.length; i++) {
       setStatus(`正在分析原圖 ${i + 1}/${files.originals.length}`);
-      originals.push({ name: files.originals[i].name, base: baseName(files.originals[i].name), ...(await load(files.originals[i])) });
+      const o = { name: files.originals[i].name, base: baseName(files.originals[i].name), ...(await load(files.originals[i])) };
+      o.ai = withAi ? await aiScore(o.canvas) : null;
+      if (withAi) aiRows.push({ name: o.name, group: '原圖', score: o.ai });
+      originals.push(o);
     }
     const bases = new Set(originals.map((o) => o.base));
 
@@ -90,6 +102,8 @@ async function run() {
       const t = tests[i];
       setStatus(`正在比對測試圖 ${i + 1}/${tests.length}：${t.file.name}`);
       const features = await load(t.file);
+      const ai = withAi ? await aiScore(features.canvas) : null;
+      if (withAi) aiRows.push({ name: t.file.name, group: t.kind === 'edited' ? `改造圖：${t.type}` : '對照圖', score: ai });
       for (const o of originals) {
         const r = await M.comparePair(o, features);
         pairs.push({
@@ -106,6 +120,13 @@ async function run() {
           faceDist: r.faceDist,
           layers: r.layers,
           verdict: r.verdict,
+          editTags: r.edit.tags,
+          changedInFace: r.edit.changedInFace,
+          changedOutsideFace: r.edit.changedOutsideFace,
+          coverage: r.edit.coverage,
+          refUsed: r.edit.refUsed,
+          ai,
+          originalAi: o.ai,
         });
       }
       // 讓畫面有機會更新
@@ -214,6 +235,38 @@ function render(originalCount, tests) {
       '</tbody>'
     : '<tbody><tr><td>全部改造圖都被綜合判斷認回。</td></tr></tbody>';
 
+  // 改動類型：每種處理方式的改造圖，各被判斷成什麼
+  const tagKeys = Object.keys(EDIT_LABELS).filter((k) => positives.some((p) => p.editTags.includes(k)));
+  $('edit-types').innerHTML = tagKeys.length
+    ? `<thead><tr><th>處理方式</th><th>張數</th>${tagKeys.map((k) => `<th>${EDIT_LABELS[k]}</th>`).join('')}<th>無法判斷</th></tr></thead><tbody>` +
+      [...byType.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0], 'zh-Hant'))
+        .map(
+          ([type, list]) =>
+            `<tr><td>${esc(type)}</td><td>${list.length}</td>${tagKeys.map((k) => `<td>${list.filter((p) => p.editTags.includes(k)).length || ''}</td>`).join('')}<td>${list.filter((p) => !p.editTags.length).length || ''}</td></tr>`,
+        )
+        .join('') +
+      '</tbody>'
+    : '<tbody><tr><td>沒有可以判斷改動類型的改造圖。</td></tr></tbody>';
+
+  // 疑似 AI 生成分數：依類別列出分布與超過門檻的比例
+  $('ai-section').hidden = !aiRows.length;
+  if (aiRows.length) {
+    const order = (g) => (g === '原圖' ? 0 : g === '對照圖' ? 1 : 2);
+    const groups = [...groupBy(aiRows, (r) => r.group).entries()].sort(
+      (a, b) => order(a[0]) - order(b[0]) || a[0].localeCompare(b[0], 'zh-Hant'),
+    );
+    $('ai-table').innerHTML =
+      `<thead><tr><th>類別</th><th>張數</th><th>分數：最小／中位／最大</th><th>${AI_THRESHOLDS.mid} 以上</th><th>${AI_THRESHOLDS.high} 以上</th></tr></thead><tbody>` +
+      groups
+        .map(([group, list]) => {
+          const scores = list.map((r) => r.score);
+          return `<tr><td>${esc(group)}</td><td>${list.length}</td><td>${fmt(stats(scores), 2)}</td><td>${pct(scores.filter((v) => v >= AI_THRESHOLDS.mid).length, list.length)}</td><td>${pct(scores.filter((v) => v >= AI_THRESHOLDS.high).length, list.length)}</td></tr>`;
+        })
+        .join('') +
+      '</tbody>';
+  }
+
   const T = M.THRESHOLDS;
   $('thresholds').textContent =
     `雜湊相異 ${T.hashNear}／${T.hashClose} 位元以內；向量相似度 ${T.embedHigh}／${T.embedMid} 以上；` +
@@ -232,6 +285,8 @@ function downloadCsv() {
   const head = [
     '測試圖', '類別', '處理方式', '原圖', '是否為正確來源', '雜湊相異位元', '向量相似度',
     '特徵點配對數', '通過幾何驗證數', '改動面積比例', '人臉距離', '綜合判斷',
+    '測試圖的疑似AI分數', '原圖的疑似AI分數',
+    '改動類型', '臉部改動比例', '臉以外改動比例', '原圖占測試圖比例', '原圖被使用比例',
   ];
   const rows = pairs.map((p) => [
     p.test,
@@ -246,6 +301,10 @@ function downloadCsv() {
     p.changedRatio === null ? '' : p.changedRatio.toFixed(4),
     p.faceDist === null ? '' : p.faceDist.toFixed(4),
     p.verdict,
+    p.ai === null ? '' : p.ai.toFixed(4),
+    p.originalAi === null ? '' : p.originalAi.toFixed(4),
+    p.editTags.map((t) => EDIT_LABELS[t] || t).join('、'),
+    ...[p.changedInFace, p.changedOutsideFace, p.coverage, p.refUsed].map((v) => (v === null || v === undefined ? '' : v.toFixed(4))),
   ]);
   // 開頭加 BOM，試算表軟體才會把中文讀對
   const text = '﻿' + [head, ...rows].map((r) => r.map(csvCell).join(',')).join('\n');

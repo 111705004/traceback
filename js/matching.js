@@ -22,6 +22,13 @@ export const THRESHOLDS = {
   faceSame: 0.5, // 人臉特徵的歐氏距離，越小越像
   faceId: 0.55, // 證件照通常較舊、較小，放寬一些
   diffPixel: 40, // 灰階差異超過此值視為被改動
+  // 以下用來判斷改動類型，比例都是 0 到 1
+  editOverlay: 0.015, // 臉以外的改動低於此值視為沒有改動
+  editHeavy: 0.45, // 臉以外的改動超過此值視為背景或身體被換掉
+  editBorder: 0.6, // 照片外圍一圈被改動的比例超過此值，也視為背景被換掉
+  editFaceChanged: 0.35, // 臉部區域的改動超過此值視為臉被修改
+  editCropUsed: 0.85, // 你的照片出現在可疑圖裡的比例低於此值視為被裁切
+  editEmbedCover: 0.75, // 你的照片占可疑圖的比例低於此值視為被放進別的版面
 };
 
 // ---------- 影像工具 ----------
@@ -256,7 +263,8 @@ export function clearFeatureCache() {
 }
 
 // 回傳：配對數、通過幾何驗證的配對數、被改動的面積比例，以及標出改動區域的畫布。
-export async function localMatch(refCanvas, susCanvas) {
+// refFaceBox 是參考照上本人臉部的方框；有提供時，會另外量出臉部與臉以外各被改動多少。
+export async function localMatch(refCanvas, susCanvas, refFaceBox = null) {
   await loadOpenCV();
   const cv = cvModule;
   const trash = [];
@@ -264,7 +272,18 @@ export async function localMatch(refCanvas, susCanvas) {
     trash.push(m);
     return m;
   };
-  const result = { good: 0, inliers: 0, changedRatio: null, overlay: null };
+  const result = {
+    good: 0,
+    inliers: 0,
+    changedRatio: null,
+    overlay: null,
+    coverage: null, // 參考照占可疑圖面積的比例
+    refUsed: null, // 參考照有多少比例出現在可疑圖裡
+    faceRegion: null, // 參考照的臉對應到可疑圖上的位置
+    changedInFace: null,
+    changedOutsideFace: null,
+    changedOnBorder: null, // 照片外圍一圈有多少比例被改動
+  };
   try {
     const f1 = localFeatures(cv, refCanvas);
     const f2 = localFeatures(cv, susCanvas);
@@ -337,7 +356,78 @@ export async function localMatch(refCanvas, susCanvas) {
     cv.morphologyEx(mask, mask, cv.MORPH_OPEN, small);
     cv.morphologyEx(mask, mask, cv.MORPH_CLOSE, big);
     cv.bitwise_and(mask, valid, mask);
-    result.changedRatio = cv.countNonZero(mask) / validArea;
+    const changedArea = cv.countNonZero(mask);
+    result.changedRatio = changedArea / validArea;
+    result.coverage = validArea / (sus.cols * sus.rows);
+
+    // 外圍一圈的改動比例。換背景會把整圈都改掉；加橫幅或貼圖只會動到其中一段。
+    const band = Math.max(5, Math.round(Math.min(sus.cols, sus.rows) * 0.1) | 1);
+    const bandKernel = keep(cv.Mat.ones(band, band, cv.CV_8U));
+    const inner = keep(new cv.Mat());
+    // 邊界外當成空白，照片占滿整張圖時才量得到外圍
+    cv.erode(valid, inner, bandKernel, new cv.Point(-1, -1), 1, cv.BORDER_CONSTANT, new cv.Scalar(0));
+    const ring = keep(new cv.Mat());
+    cv.subtract(valid, inner, ring);
+    const ringArea = cv.countNonZero(ring);
+    if (ringArea > 0) {
+      const ringChanged = keep(new cv.Mat());
+      cv.bitwise_and(mask, ring, ringChanged);
+      result.changedOnBorder = cv.countNonZero(ringChanged) / ringArea;
+    }
+
+    // 反向對齊一張全白的圖，看參考照有多少面積落在可疑圖的範圍內
+    const whiteSus = keep(new cv.Mat(sus.rows, sus.cols, cv.CV_8UC1, new cv.Scalar(255)));
+    const back = keep(new cv.Mat());
+    cv.warpPerspective(
+      whiteSus,
+      back,
+      H,
+      new cv.Size(ref.cols, ref.rows),
+      cv.INTER_NEAREST | (cv.WARP_INVERSE_MAP ?? 16),
+      cv.BORDER_CONSTANT,
+      new cv.Scalar(),
+    );
+    result.refUsed = cv.countNonZero(back) / (ref.cols * ref.rows);
+
+    // 把參考照上的臉部方框搬到可疑圖的座標，分別統計臉部與臉以外的改動
+    if (refFaceBox) {
+      const h = H.data64F;
+      // 偵測到的臉部方框只到額頭與下巴，往外放寬兩成，把髮際與臉頰邊緣算進來
+      const grow = 0.2;
+      const b = {
+        x: refFaceBox.x - refFaceBox.width * grow,
+        y: refFaceBox.y - refFaceBox.height * grow,
+        width: refFaceBox.width * (1 + 2 * grow),
+        height: refFaceBox.height * (1 + 2 * grow),
+      };
+      const xs = [];
+      const ys = [];
+      for (const [x, y] of [[b.x, b.y], [b.x + b.width, b.y], [b.x + b.width, b.y + b.height], [b.x, b.y + b.height]]) {
+        const w = h[6] * x + h[7] * y + h[8] || 1;
+        xs.push((h[0] * x + h[1] * y + h[2]) / w);
+        ys.push((h[3] * x + h[4] * y + h[5]) / w);
+      }
+      const clamp = (v, max) => Math.max(0, Math.min(max, Math.round(v)));
+      const x0 = clamp(Math.min(...xs), sus.cols);
+      const x1 = clamp(Math.max(...xs), sus.cols);
+      const y0 = clamp(Math.min(...ys), sus.rows);
+      const y1 = clamp(Math.max(...ys), sus.rows);
+      if (x1 - x0 >= 8 && y1 - y0 >= 8) {
+        const rect = new cv.Rect(x0, y0, x1 - x0, y1 - y0);
+        const maskRoi = mask.roi(rect);
+        const validRoi = valid.roi(rect);
+        const changedIn = cv.countNonZero(maskRoi);
+        const validIn = cv.countNonZero(validRoi);
+        maskRoi.delete();
+        validRoi.delete();
+        if (validIn > 0) {
+          result.faceRegion = { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+          result.changedInFace = changedIn / validIn;
+          const validOut = validArea - validIn;
+          result.changedOutsideFace = validOut > 0 ? (changedArea - changedIn) / validOut : null;
+        }
+      }
+    }
 
     // 產生標示畫布：紅色是被改動的區域，變暗的是參考照沒有涵蓋的區域
     const overlay = document.createElement('canvas');
@@ -396,6 +486,9 @@ export function loadFace() {
   return facePromise;
 }
 
+// 每張畫布偵測到的臉部方框，順序與 faceDescriptors 回傳的特徵向量相同。
+const faceBoxCache = new WeakMap();
+
 // 回傳畫面中每張臉的特徵向量，由大到小排列。
 export async function faceDescriptors(canvas) {
   const faceapi = await loadFace();
@@ -403,9 +496,19 @@ export async function faceDescriptors(canvas) {
     .detectAllFaces(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }))
     .withFaceLandmarks()
     .withFaceDescriptors();
-  return found
-    .sort((a, b) => b.detection.box.area - a.detection.box.area)
-    .map((f) => f.descriptor);
+  found.sort((a, b) => b.detection.box.area - a.detection.box.area);
+  faceBoxCache.set(
+    canvas,
+    found.map((f) => {
+      const b = f.detection.box;
+      return { x: b.x, y: b.y, width: b.width, height: b.height };
+    }),
+  );
+  return found.map((f) => f.descriptor);
+}
+
+export function faceBoxes(canvas) {
+  return faceBoxCache.get(canvas) || [];
 }
 
 export function faceDistance(a, b) {
@@ -422,6 +525,63 @@ export function closestFace(listA, listB) {
   return best;
 }
 
+// ---------- 改動類型 ----------
+
+// 依對齊後量到的數值，判斷可疑圖相對於參考照被做了哪些事。
+// 回傳的 tags 可能同時有好幾個，例如「裁切、左右翻轉、加上文字」。
+// 這是依規則推斷，不是模型判定；門檻是暫定值。
+function analyzeEdit(verdict, layers, local, mirrored, faceThere) {
+  const T = THRESHOLDS;
+  const edit = {
+    basis: 'none', // aligned：對齊後量出來的；hash：幾乎相同的圖；face-only：只有臉像；none：無法判斷
+    tags: [],
+    mirrored,
+    coverage: local.coverage,
+    refUsed: local.refUsed,
+    changedRatio: local.changedRatio,
+    changedInFace: local.changedInFace,
+    changedOutsideFace: local.changedOutsideFace,
+    changedOnBorder: local.changedOnBorder,
+    faceThereDist: faceThere,
+  };
+  if (verdict !== 'derived' && verdict !== 'likely') {
+    if (verdict === 'face-only') {
+      edit.basis = 'face-only';
+      edit.tags.push('face-only');
+    }
+    return edit;
+  }
+  if (local.changedRatio === null) {
+    // 沒有對齊結果卻判定相符，只會是雜湊幾乎相同
+    if (layers.hash === 'high') {
+      edit.basis = 'hash';
+      edit.tags.push('identical');
+    }
+    return edit;
+  }
+
+  edit.basis = 'aligned';
+  if (mirrored) edit.tags.push('mirrored');
+  if (local.refUsed !== null && local.refUsed < T.editCropUsed) edit.tags.push('cropped');
+  if (local.coverage !== null && local.coverage < T.editEmbedCover) edit.tags.push('embedded');
+
+  if (local.changedInFace !== null) {
+    if (local.changedInFace >= T.editFaceChanged) {
+      // 臉的位置被改了：那裡偵測不到臉算被遮住，認得出是本人算修改，是另一張臉算被換掉
+      if (faceThere === null) edit.tags.push('face-hidden');
+      else edit.tags.push(faceThere <= T.faceSame ? 'face-retouched' : 'face-replaced');
+    } else {
+      edit.tags.push('face-intact');
+    }
+  }
+  const outside = local.changedOutsideFace ?? local.changedRatio;
+  if (outside >= T.editHeavy || (local.changedOnBorder ?? 0) >= T.editBorder) edit.tags.push('background');
+  else if (outside >= T.editOverlay) edit.tags.push('overlay');
+
+  if (edit.tags.every((t) => t === 'face-intact')) edit.tags.push('identical');
+  return edit;
+}
+
 // ---------- 綜合 ----------
 
 // 為一張圖算出比對所需的特徵。
@@ -436,7 +596,10 @@ export async function describe(canvas, { withEmbedding = true, withFaces = true 
 export async function comparePair(ref, sus) {
   const hashDistance = hamming(ref.hash, sus.hash);
   const embedSim = ref.embedding && sus.embedding ? cosine(ref.embedding, sus.embedding) : null;
-  let local = await localMatch(ref.canvas, sus.canvas);
+  // 參考照上哪一張臉是本人：呼叫端有指定就用指定的，否則用最大的那張
+  const refFaceIndex = ref.faceIndex ?? 0;
+  const refFaceBox = faceBoxes(ref.canvas)[refFaceIndex] || null;
+  let local = await localMatch(ref.canvas, sus.canvas, refFaceBox);
   const faceDist = closestFace(ref.faces, sus.faces);
 
   const T = THRESHOLDS;
@@ -445,10 +608,12 @@ export async function comparePair(ref, sus) {
   const related = (embedSim !== null && embedSim >= T.embedMid) || (faceDist !== null && faceDist <= T.faceSame);
   if (local.inliers < T.inliersMid && related) {
     const flipped = flipCanvas(sus.canvas);
-    const alt = await localMatch(ref.canvas, flipped);
+    const alt = await localMatch(ref.canvas, flipped, refFaceBox);
     forgetFeatures(flipped);
     if (alt.inliers > local.inliers && alt.inliers >= T.inliersMid) {
       if (alt.overlay) alt.overlay = flipCanvas(alt.overlay);
+      // 臉部位置是在翻轉後的座標量的，換回原本的座標
+      if (alt.faceRegion) alt.faceRegion.x = sus.canvas.width - alt.faceRegion.x - alt.faceRegion.width;
       local = alt;
       mirrored = true;
     }
@@ -477,5 +642,21 @@ export async function comparePair(ref, sus) {
 
   // 排序用：幾何驗證最可靠，其次是特徵向量與雜湊
   const rank = local.inliers * 10 + (embedSim || 0) * 100 + (64 - hashDistance);
-  return { hashDistance, embedSim, local, faceDist, layers, verdict, rank, mirrored };
+  // 參考照的臉對應到可疑圖的位置上，現在是誰的臉
+  let faceThere = null;
+  const refFace = ref.faces[refFaceIndex];
+  if (local.faceRegion && refFace) {
+    const r = local.faceRegion;
+    faceBoxes(sus.canvas).forEach((b, i) => {
+      const cx = b.x + b.width / 2;
+      const cy = b.y + b.height / 2;
+      if (cx >= r.x && cx <= r.x + r.width && cy >= r.y && cy <= r.y + r.height && sus.faces[i]) {
+        const d = faceDistance(refFace, sus.faces[i]);
+        if (faceThere === null || d < faceThere) faceThere = d;
+      }
+    });
+  }
+  const edit = analyzeEdit(verdict, layers, local, mirrored, faceThere);
+
+  return { hashDistance, embedSim, local, faceDist, layers, verdict, rank, mirrored, edit };
 }
