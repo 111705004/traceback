@@ -1,0 +1,19 @@
+{
+  "name": "traceback-api",
+  "private": true,
+  "description": "尋影 TraceBack 後端：登錄庫、民眾查證、線索回報、轉送服務",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "db:local": "wrangler d1 execute traceback --local --file=schema.sql",
+    "db:remote": "wrangler d1 execute traceback --remote --file=schema.sql",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.114.17"
+  },
+  "allowScripts": {
+    "workerd@1.20250718.0": true,
+    "esbuild@0.17.19": true
+  }
+}

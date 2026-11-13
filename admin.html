@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>審核 · 尋影 TraceBack</title>
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+  </svg>
+  <header class="top">
+    <a class="brand" href="index.html">
+      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
+      <strong>尋影 TraceBack</strong>
+      <span class="tag">審核</span>
+    </a>
+  </header>
+  <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+  <main>
+    <section class="view">
+      <h1>登錄審核</h1>
+      <p class="lead">確認登錄者是本人後才開放查證。原型用人工審核代替正式的身分驗證：請透過登錄者的官方帳號私訊或其他管道確認。</p>
+      <div class="grid">
+        <label class="field">
+          <span>管理員密碼（ADMIN_TOKEN）</span>
+          <input type="password" id="admin-token" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>顯示</span>
+          <select id="filter">
+            <option value="pending">待審核</option>
+            <option value="approved">已開放</option>
+            <option value="rejected">未通過</option>
+          </select>
+        </label>
+      </div>
+      <div class="row"><button type="button" class="primary" id="load">讀取</button></div>
+      <p class="result-line" id="admin-result"></p>
+      <ul class="inbox" id="kols"></ul>
+    </section>
+  </main>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

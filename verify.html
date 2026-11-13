@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>查證代言 · 尋影 TraceBack</title>
+  <meta name="description" content="看到名人、老師、醫師推薦的廣告或投資群組？上傳截圖，確認是不是本人。">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5m0 0-4 4m4-4 4 4M5 19h14"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 19h18L12 4Z"/><path d="M12 10v4m0 3v.01"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7m0 3v.01"/></symbol>
+  </svg>
+
+  <header class="top">
+    <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到首頁">
+      <span class="logo"><svg class="icon"><use href="#i-search"/></svg></span>
+      <strong>尋影 TraceBack</strong>
+      <span class="tag">查證代言</span>
+    </a>
+    <button type="button" class="help-btn" id="help-open"><svg class="icon"><use href="#i-help"/></svg>需要協助</button>
+  </header>
+
+  <p class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>截圖先在你的裝置上轉成臉部特徵數值，送出比對的是數值，不是截圖。只有你按下「交給本人確認」時，才會上傳縮小後的截圖。</span></p>
+
+  <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+
+  <main>
+    <section class="view" id="form-view">
+      <h1>這個人真的是本人嗎？</h1>
+      <p class="lead">看到某位老師、醫師或網紅推薦投資、邀你進群組，或私訊你？在加入群組或匯款之前，先上傳截圖查一下。</p>
+
+      <p class="callout" id="no-backend" hidden>這個網站還沒連上後端，目前無法查證。部署方式見 <code>backend/README.md</code>。</p>
+
+      <label class="drop" id="shot-drop">
+        <svg class="icon"><use href="#i-upload"/></svg>
+        <strong id="shot-title">上傳廣告、貼文或帳號頭像的截圖</strong>
+        <span id="shot-name">點這裡選檔案、把圖拖進來，或直接貼上截圖</span>
+        <input type="file" class="vh" id="shot-file" accept="image/*">
+      </label>
+      <p class="result-line" id="shot-result"></p>
+
+      <h2>對方是哪個帳號？</h2>
+      <p class="note">填了可以比對是不是本人的官方帳號。不知道可以留白。</p>
+      <div class="grid">
+        <label class="field">
+          <span>平台</span>
+          <select id="platform"><option value="">不知道</option></select>
+        </label>
+        <label class="field">
+          <span>帳號 ID 或網址</span>
+          <input type="text" id="handle" autocomplete="off" placeholder="例如 @teacher.wang 或 LINE ID">
+        </label>
+        <label class="field">
+          <span>在哪裡看到的（網址）</span>
+          <input type="text" inputmode="url" id="source-url" autocomplete="off" placeholder="https://">
+        </label>
+      </div>
+
+      <fieldset class="choices">
+        <legend>對方要你做什麼？（可複選）</legend>
+        <div class="choice-grid" id="activities"></div>
+      </fieldset>
+
+      <div class="row end">
+        <button type="button" class="primary" id="check" disabled><svg class="icon"><use href="#i-search"/></svg>查證</button>
+      </div>
+    </section>
+
+    <section class="view" id="result-view" hidden>
+      <h1>查證結果</h1>
+      <div class="verdict" id="verdict"></div>
+      <div id="reasons-wrap" hidden>
+        <h2>哪裡不符</h2>
+        <ul class="findings" id="reasons"></ul>
+      </div>
+      <div id="kol-wrap" hidden>
+        <h2 id="kol-heading">本人登錄的資料</h2>
+        <dl class="record" id="kol-record"></dl>
+      </div>
+
+      <div id="signals-wrap">
+        <h2>其他線索</h2>
+        <p class="note">下面是輔助訊號，不能單獨證明是不是假的。</p>
+        <ul class="findings" id="signals"></ul>
+        <div class="row"><button type="button" class="small" id="ai-run">再用 AI 生成偵測模型看看（約 87 MB）</button></div>
+        <p class="result-line" id="ai-result"></p>
+      </div>
+
+      <div class="callout" id="safety">
+        <strong>不論結果如何，看到下面的情況請先停下來：</strong>
+        <p>保證獲利、要你加 LINE 群組、要你下載陌生 App 或匯款到個人帳戶、催你馬上決定。有疑問請打 <a href="tel:165">165</a> 查證。</p>
+      </div>
+
+      <div id="report-wrap" hidden>
+        <h2>交給本人確認</h2>
+        <p class="note">本人確認後，之後其他人查到同一張圖，就會直接看到「本人已確認冒用」。你也可以用回報編號回來看處理進度。</p>
+        <label class="field">
+          <span>補充說明（可留白）</span>
+          <input type="text" id="report-note" maxlength="500" autocomplete="off" placeholder="例如：在臉書廣告看到，點進去被加進 LINE 群">
+        </label>
+        <label class="check"><input type="checkbox" id="report-consent"> 我同意把這張截圖（縮小後）、帳號與網址交給本人確認。截圖會在處理完 90 天後刪除。</label>
+        <div class="row">
+          <button type="button" class="primary" id="report-send" disabled>交給本人確認</button>
+        </div>
+        <p class="result-line" id="report-result"></p>
+      </div>
+
+      <div class="row end">
+        <button type="button" id="again">查另一則</button>
+      </div>
+    </section>
+
+    <section class="view">
+      <h2>查詢回報進度</h2>
+      <div class="grid">
+        <label class="field">
+          <span>回報編號</span>
+          <input type="text" id="lookup-id" autocomplete="off" maxlength="12" placeholder="12 碼英數字">
+        </label>
+      </div>
+      <div class="row"><button type="button" id="lookup">查詢</button></div>
+      <p class="result-line" id="lookup-result"></p>
+    </section>
+
+    <section class="view">
+      <h2>常見問題</h2>
+      <div class="faq">
+        <details>
+          <summary>查不到資料，代表安全嗎？</summary>
+          <p>不代表。查不到只是因為這個人沒有登錄，或截圖上的臉認不出來。詐騙常用的就是沒有登錄的人的照片。請依上面的提醒判斷，或打 165。</p>
+        </details>
+        <details>
+          <summary>「與本人聲明不符」是什麼意思？</summary>
+          <p>本人登錄時聲明過自己不做哪些事、官方帳號有哪些。你遇到的帳號或要求和這些聲明不符，所以很可能是冒用。這是轉述本人的聲明，不是系統的判斷。</p>
+        </details>
+        <details>
+          <summary>「本人已確認授權」就可以放心投資嗎？</summary>
+          <p>不行。授權只代表本人同意這則內容使用其照片，不代表投資標的合法或安全。</p>
+        </details>
+        <details>
+          <summary>可以拿來查任何人是誰嗎？</summary>
+          <p>不行。系統只比對自願登錄、開放查證的人。沒有登錄的人，系統不會告訴你他是誰。</p>
+        </details>
+      </div>
+      <p class="note">被冒用的當事人可以到<a href="kol.html">登錄頁</a>登錄。</p>
+    </section>
+  </main>
+
+  <footer class="foot">尋影 TraceBack｜原型｜提供一般資訊，不是法律意見</footer>
+
+  <dialog id="help">
+    <h2>需要協助</h2>
+    <ul class="resources">
+      <li><a class="tel" href="tel:165">165 反詐騙專線</a><span>詐騙通報與查證</span></li>
+      <li><a href="https://165.npa.gov.tw" target="_blank" rel="noopener">165 全民防騙網</a><span>線上通報與查詢</span></li>
+      <li><a class="tel" href="tel:110">110</a><span>已經匯款或有立即危險時報警</span></li>
+    </ul>
+    <form method="dialog"><button class="primary">關閉</button></form>
+  </dialog>
+
+  <dialog id="oops">
+    <h2>出了一點狀況</h2>
+    <p id="oops-text"></p>
+    <form method="dialog"><button class="primary">好</button></form>
+  </dialog>
+
+  <script type="module" src="js/verify.js"></script>
+</body>
+</html>

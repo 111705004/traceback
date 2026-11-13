@@ -3,6 +3,9 @@ import * as S from './search.js';
 import { TESTSITE_URL } from './config.js';
 import { SCENARIOS, legalPath, buildDocuments, RESOURCES } from './templates.js';
 import { explainEdit } from './edits.js';
+import { faceParts, partDistances, swapSignal } from './faceparts.js';
+import { readProvenance, describeProvenance } from './provenance.js';
+import { renderSignals, setupAiButton } from './signals.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) =>
@@ -649,11 +652,31 @@ async function runCompare() {
     }
     state.results.sort((a, b) => b.rank - a.rank);
     state.best = state.results[0];
+    setStatus('正在檢查其他線索');
+    state.provenance = await readProvenance(state.suspectFile);
+    state.swap = await checkSwap(state.best);
     setStatus('');
     renderResult();
   } catch (err) {
     fail(err);
   }
+}
+
+// 換臉檢查：可疑圖上的臉，五官像你、臉型卻不像
+async function checkSwap(b) {
+  if (!b || !state.suspect.faces.length) return null;
+  const ref = b.ref;
+  if (ref.parts === undefined) {
+    const all = await faceParts(ref.canvas);
+    ref.parts = all.length === ref.faces.length ? all[ref.faceIndex] : null;
+  }
+  if (!ref.parts) return null;
+  const sus = await faceParts(state.suspect.canvas);
+  if (!sus.length) return null;
+  // 可疑圖上可能有好幾張臉，取五官最像你的那張
+  const d = partDistances(sus, [ref.parts]).sort((x, y) => x.inner - y.inner)[0];
+  const identified = b.faceDist !== null && b.faceDist <= M.THRESHOLDS.faceSame;
+  return { found: swapSignal(d, identified), who: '你', inner: d.inner, outer: d.outer };
 }
 
 function figure(canvas, title, caption, blurred) {
@@ -691,6 +714,10 @@ function renderResult() {
   $('edits').innerHTML = how.items
     .map((i) => `<li class="${i.tag === 'face-intact' || i.tag === 'identical' ? 'calm' : ''}"><strong>${esc(i.label)}</strong>${esc(i.text)}</li>`)
     .join('');
+
+  renderSignals($('signals'), { provenance: state.provenance, swap: state.swap });
+  $('ai-run').disabled = false;
+  setLine('ai-result', '', '');
 
   const box = $('compare');
   box.appendChild(figure(copyCanvas(b.ref.canvas), `你的第 ${b.index + 1} 張照片`, b.ref.name, false));
@@ -790,6 +817,11 @@ async function buildEvidence() {
       changedRatio: b.local.changedRatio === null ? null : Number(b.local.changedRatio.toFixed(4)),
       faceDistance: b.faceDist === null ? null : Number(b.faceDist.toFixed(4)),
     };
+    ev.signals = {
+      provenance: state.provenance ? describeProvenance(state.provenance).title : null,
+      swap: state.swap ? (state.swap.found ? '可能經過換臉（五官像本人、臉型不像）' : '沒有看到換臉跡象') : null,
+      swapNumbers: state.swap ? { inner: Number(state.swap.inner.toFixed(4)), outer: Number(state.swap.outer.toFixed(4)) } : null,
+    };
   }
   state.evidence = ev;
   renderEvidence();
@@ -815,6 +847,9 @@ function evidenceRows(ev) {
     rows.push(['你的照片檔名', ev.match.referenceFile]);
     rows.push(['你的照片的數位指紋（SHA-256）', ev.match.referenceSha256]);
     rows.push(['比對結果', ev.match.summary]);
+    const s = ev.signals || {};
+    const other = [s.provenance, s.swap].filter(Boolean).join('；');
+    if (other) rows.push(['其他線索（輔助，非判定）', other]);
   } else if (ev.minor) {
     rows.push(['影像', '依設計不收取、不保存']);
   }
@@ -949,6 +984,7 @@ function startPath(path) {
 }
 
 function init() {
+  setupAiButton($('ai-run'), $('ai-result'), () => state.suspect?.canvas);
   renderScenarios();
   renderWeights();
   $('found-at').value = localDateTimeValue();

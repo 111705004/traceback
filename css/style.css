@@ -264,7 +264,7 @@ details.more > .inner { padding: 0 16px 14px; }
 }
 .card h2 { margin: 0; font-size: 1.2rem; }
 .card p { margin: 0; color: var(--muted); flex: 1; }
-.card button { margin-top: 12px; align-self: flex-start; }
+.card button, .card .file-btn { margin-top: 12px; align-self: flex-start; text-decoration: none; }
 .card .badge {
   width: 46px;
   height: 46px;
@@ -551,3 +551,55 @@ footer.foot { text-align: center; color: var(--muted); font-size: 0.8125rem; mar
   .row.end button { flex: 1; }
   .brand .tag { display: none; }
 }
+
+/* ---------- 民眾查證、本人登錄、審核 ---------- */
+
+.verdict.calm { background: var(--ok-soft); border-color: var(--ok-line); }
+.verdict.calm .icon { color: var(--ok); }
+.check { align-items: flex-start; }
+.check input { flex: none; margin-top: 0.3em; }
+
+.accounts-edit, .accounts-verify, .inbox { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 12px; }
+.accounts-edit li {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.7fr) 1fr 1.3fr auto;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--surface);
+}
+.accounts-edit .field { margin: 0; }
+.accounts-verify li {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  background: var(--surface);
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+}
+.accounts-verify small { color: var(--muted); }
+.inbox > li {
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--surface-soft);
+  display: grid;
+  grid-template-columns: minmax(0, 200px) 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.inbox > li:has(> .inbox-body:only-child) { grid-template-columns: 1fr; }
+.inbox > li.report-fake { border-color: #eeb79d; }
+.inbox > li.report-authorized, .inbox > li.report-dismissed { opacity: 0.85; }
+.inbox img { width: 100%; height: auto; border-radius: var(--radius-sm); border: 1px solid var(--line); }
+.inbox .record { margin: 8px 0; }
+.inbox-body { min-width: 0; }
+
+@media (max-width: 640px) {
+  .accounts-edit li { grid-template-columns: 1fr; }
+  .inbox > li { grid-template-columns: 1fr; }
+}
+.accounts-verify .result-line:empty { display: none; }

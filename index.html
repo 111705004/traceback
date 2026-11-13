@@ -84,6 +84,22 @@
         </article>
       </div>
 
+      <h2>也可以這樣用</h2>
+      <div class="paths">
+        <article class="card">
+          <span class="badge"><svg class="icon"><use href="#i-shield"/></svg></span>
+          <h2>我看到一則廣告，想確認是不是本人</h2>
+          <p>有人推薦投資、邀你進 LINE 群組或私訊你？上傳截圖，看看是不是本人、跟本人的聲明符不符。不用註冊。</p>
+          <a class="file-btn primary" href="verify.html">查證代言</a>
+        </article>
+        <article class="card">
+          <span class="badge"><svg class="icon"><use href="#i-id"/></svg></span>
+          <h2>我常被冒用，想讓民眾查得到我</h2>
+          <p>登錄你的臉、官方帳號和「我不會做的事」。民眾查證時會看到你的聲明，他們回報的可疑內容也會交給你確認。</p>
+          <a class="file-btn" href="kol.html">本人登錄</a>
+        </article>
+      </div>
+
       <h2>會做哪些事</h2>
       <ol class="how">
         <li><strong>確認是你本人</strong><span>拍一張自拍，確保只有你能查自己的照片。</span></li>
@@ -96,7 +112,7 @@
       <div class="faq">
         <details>
           <summary>我的照片會被傳到哪裡嗎？</summary>
-          <p>不會。所有比對都在你這台裝置的瀏覽器裡完成，這個網站沒有伺服器可以接收照片。唯一會從網路下載的，是比對用的模型檔。關掉頁面後，這次的資料就消失了。</p>
+          <p>不會。上面兩條路徑的比對都在你這台裝置的瀏覽器裡完成，照片不會上傳。關掉頁面後，這次的資料就消失了。另外兩個入口會用到伺服器：「本人登錄」會保存你照片的臉部特徵數值（不存照片），「查證代言」會送出截圖的臉部特徵數值比對，只有民眾按下「交給本人確認」時才會上傳縮小後的截圖。</p>
         </details>
         <details>
           <summary>這能代替律師或報案嗎？</summary>
@@ -220,7 +236,7 @@
             </select>
           </label>
         </div>
-        <p class="note">原型的限制：瀏覽器不能直接讀取別的網站，目前只能掃描這個網站自己的頁面，例如<button type="button" class="link" id="scan-example">內建的測試站</button>。要掃描外部網站，需要先部署 <code>proxy/worker.js</code> 並在 <code>js/config.js</code> 填上位址。</p>
+        <p class="note">原型的限制：瀏覽器不能直接讀取別的網站，目前只能掃描這個網站自己的頁面，例如<button type="button" class="link" id="scan-example">內建的測試站</button>。要掃描外部網站，需要先部署後端（<code>backend/</code>）並在 <code>js/config.js</code> 填上位址。</p>
       </div>
 
       <div class="row">
@@ -336,6 +352,13 @@
         <h2>它被動了什麼手腳</h2>
         <ul class="findings" id="edits"></ul>
         <p class="note">這是拿你的照片和可疑圖逐區比較後的推斷，門檻是暫定值。請以你自己看到的為準。</p>
+      </div>
+      <div id="signals-wrap">
+        <h2>其他線索</h2>
+        <p class="note">下面是輔助訊號，不能單獨證明是不是假的。</p>
+        <ul class="findings" id="signals"></ul>
+        <div class="row"><button type="button" class="small" id="ai-run">再用 AI 生成偵測模型看看（約 87 MB）</button></div>
+        <p class="result-line" id="ai-result"></p>
       </div>
       <details class="more">
         <summary>看比對的細節</summary>

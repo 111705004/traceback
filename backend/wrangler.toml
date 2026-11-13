@@ -1,0 +1,17 @@
+name = "traceback-api"
+main = "src/index.js"
+compatibility_date = "2025-07-01"
+
+# 允許呼叫這個服務的網站，用逗號分隔
+[vars]
+ALLOWED_ORIGINS = "https://111705004.github.io,http://localhost:8765"
+
+# 第一次部署前執行 npx wrangler d1 create traceback，把印出來的 database_id 填在這裡
+[[d1_databases]]
+binding = "DB"
+database_name = "traceback"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+# 每天清理過期的回報圖片
+[triggers]
+crons = ["0 19 * * *"]
