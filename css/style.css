@@ -1,11 +1,12 @@
 /* Hallmark · v2.0.0 · redesign: polish · scope: app · genre: editorial · job: verify a suspicious ad, or collect evidence when your face was misused · theme: kept (warm paper, one rust accent) */
+/* Hallmark · direction: trust patterns read from awesome-design-md (Wise, Mercury, Stripe): one filled action colour, status colours apart from the brand, tonal depth, tabular figures; no brand colour or logo copied; see DESIGN.md */
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, the layout is kept on purpose (polish only); fixed the tells: tokens, motion, focus, spacing scale, stripes */
 /* Hallmark · waive 28b · the video is the live selfie camera, hidden until the user presses the camera button · a live camera preview of the user's own face has no poster frame */
 /* Hallmark · dismissed F4 · the role and option rows are tinted cards with a description, not filled primary buttons; the page has one primary style */
 /* Hallmark · dismissed 49 · these clickable rows are cards with a title and a description line, wrapping is intended */
 /* Hallmark · answered F7 · thumbs, documents, accounts and lists share one quiet card on purpose so the verdict and the choice cards stand out */
 :root {
-  --bg: #fbf5ec;
+  --bg: #f6eee3;
   --surface: #fffdf9;
   --surface-soft: #fdf9f3;
   --text: #33291f;
@@ -23,9 +24,18 @@
   --warn-text: #6b4e00;
   --bad: #b3261e;
   --bad-soft: #fbe6e3;
+  /* 狀態色和品牌色分開：鐵鏽橘只給「動作」，冒用、不符這類警示一律用 danger */
+  --danger: #a32a22;
+  --danger-soft: #fbe9e6;
+  --danger-line: #efbcb4;
+  --danger-text: #7a1d16;
+  /* 次要按鈕與中性資訊用色調區分，不靠框線 */
+  --tonal: #f1e7da;
+  --tonal-hover: #eadccb;
+  --input-line: #c9b59b;
   --radius: 18px;
   --radius-sm: 12px;
-  --shadow: 0 1px 2px rgba(80, 55, 30, 0.06), 0 8px 24px rgba(80, 55, 30, 0.07);
+  --shadow: 0 1px 2px rgba(80, 55, 30, 0.05), 0 4px 12px rgba(80, 55, 30, 0.04);
   /* 以下是從各處收攏進來的顏色，數值不變，只是統一管理 */
   --line-strong: #d6c4ab;
   --line-input: #cdbba3;
@@ -69,8 +79,8 @@ body {
   font: 17px/1.75 var(--font-body);
 }
 
-h1 { font-size: 1.65rem; line-height: 1.4; margin: 20px 0 8px; letter-spacing: 0.01em; text-wrap: balance; }
-h2 { font-size: 1.15rem; line-height: 1.5; margin: 28px 0 8px; }
+h1 { font-size: 1.65rem; line-height: 1.4; margin: 20px 0 8px; letter-spacing: 0.01em; font-weight: 600; text-wrap: balance; }
+h2 { font-size: 1.15rem; line-height: 1.5; margin: 28px 0 8px; font-weight: 600; }
 h3 { font-size: 1rem; margin: 0 0 4px; }
 p { margin: 8px 0; text-wrap: pretty; }
 a { color: var(--accent-dark); text-underline-offset: 3px; }
@@ -164,9 +174,9 @@ button, .file-btn {
   font: inherit;
   min-height: 48px;
   padding: 12px 24px;
-  border: 1.5px solid var(--line);
+  border: 1.5px solid transparent;
   border-radius: 999px;
-  background: var(--surface);
+  background: var(--tonal);
   color: var(--text);
   cursor: pointer;
   display: inline-flex;
@@ -177,7 +187,7 @@ button, .file-btn {
   transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 160ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
-  button:hover:not(:disabled), .file-btn:hover { border-color: var(--line-strong); background: var(--surface-soft); }
+  button:hover:not(:disabled), .file-btn:hover { background: var(--tonal-hover); }
 }
 button:active:not(:disabled), .file-btn:active { transform: scale(0.97); }
 button.primary, .file-btn.primary {
@@ -185,7 +195,6 @@ button.primary, .file-btn.primary {
   border-color: var(--accent);
   color: var(--accent-text);
   font-weight: 600;
-  box-shadow: 0 2px 0 var(--accent-dark);
 }
 @media (hover: hover) and (pointer: fine) {
   button.primary:hover:not(:disabled), .file-btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
@@ -267,9 +276,9 @@ main > .view + .view { margin-top: 16px; }
   font: inherit;
   min-height: 46px;
   padding: 8px 12px;
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--input-line);
   border-radius: var(--radius-sm);
-  background: var(--surface-soft);
+  background: var(--surface);
   color: var(--text);
 }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 16px; }
@@ -460,8 +469,9 @@ details.more > .inner { padding: 0 16px 16px; }
 .verdict .icon { width: 30px; height: 30px; margin-top: 2px; color: var(--muted); }
 .verdict strong { display: block; font-size: 1.15rem; line-height: 1.5; }
 .verdict p { margin: 4px 0 0; color: var(--muted); font-size: 0.9375rem; }
-.verdict.strong { background: var(--accent-soft); border-color: var(--accent-line); }
-.verdict.strong .icon { color: var(--accent); }
+.verdict.strong { background: var(--danger-soft); border-color: var(--danger-line); }
+.verdict.strong .icon { color: var(--danger); }
+.verdict.strong strong { color: var(--danger-text); }
 .verdict.likely { background: var(--warn-bg); border-color: var(--warn-line); }
 .verdict.likely .icon { color: var(--warn-icon); }
 
@@ -474,11 +484,12 @@ details.more > .inner { padding: 0 16px 16px; }
 .compare .reveal { margin-top: 8px; }
 
 .findings { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 8px; }
-.findings li { border: 1px solid var(--accent-line); background: var(--accent-soft); border-radius: 8px; padding: 8px 16px; font-size: 0.9375rem; }
-.findings li.calm { border-color: var(--ok-line); background: var(--ok-soft); }
+.findings li { border: 0; background: var(--tonal); border-radius: 8px; padding: 8px 16px; font-size: 0.9375rem; }
+.findings li.alert, #reasons li { background: var(--danger-soft); color: var(--danger-text); }
+.findings li.calm { background: var(--ok-soft); }
 .findings strong { display: block; }
 
-table.layers { width: 100%; border-collapse: collapse; font-size: 0.9375rem; margin: 12px 0; }
+table.layers { width: 100%; border-collapse: collapse; font-size: 0.9375rem; margin: 12px 0; font-variant-numeric: tabular-nums; }
 table.layers th, table.layers td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
 table.layers th { color: var(--muted); font-weight: 600; font-size: 0.8125rem; }
 .pill { display: inline-block; padding: 0 12px; border-radius: 999px; font-size: 0.8125rem; border: 1px solid var(--line); white-space: nowrap; }
@@ -514,7 +525,7 @@ code { background: var(--surface-soft); border: 1px solid var(--line); padding: 
 .crawl-log .hit { color: var(--accent-dark); font-weight: 700; white-space: nowrap; }
 .crawl-log .miss { color: var(--muted); white-space: nowrap; }
 .crawl-log li.is-hit { background: var(--accent-soft); border-radius: 8px; }
-.score { display: inline-block; min-width: 44px; text-align: center; font-size: 0.75rem; border-radius: 999px; padding: 0 8px; background: var(--line); color: var(--muted); margin-right: 8px; }
+.score { font-variant-numeric: tabular-nums; display: inline-block; min-width: 44px; text-align: center; font-size: 0.75rem; border-radius: 999px; padding: 0 8px; background: var(--line); color: var(--muted); margin-right: 8px; }
 .score.hot { background: var(--hot-bg); color: var(--hot-text); }
 
 .hits { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 16px; }
@@ -532,7 +543,7 @@ code { background: var(--surface-soft); border: 1px solid var(--line); padding: 
 
 .record { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 8px 16px; margin: 16px 0; font-size: 0.9375rem; background: var(--surface-soft); border-radius: var(--radius-sm); padding: 16px 16px; }
 .record dt { color: var(--muted); }
-.record dd { margin: 0; overflow-wrap: anywhere; }
+.record dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .record code { font-size: 0.8125rem; }
 
 /* ---------- 行動 ---------- */

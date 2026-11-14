@@ -8,7 +8,7 @@ const esc = (s) =>
 
 function item(level, title, text) {
   // level：high 值得注意、mid 參考、low 沒發現
-  return `<li class="${level === 'low' ? 'calm' : ''}"><strong>${esc(title)}</strong>${esc(text)}</li>`;
+  return `<li class="${level === 'low' ? 'calm' : level === 'high' ? 'alert' : ''}"><strong>${esc(title)}</strong>${esc(text)}</li>`;
 }
 
 // provenance：readProvenance 的結果；swap：{ found, inner, outer, basis } 或 null

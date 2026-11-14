@@ -4,6 +4,10 @@
 
 它提供一般資訊與文件草稿，不是法律意見。
 
+## 設計規範
+
+[`DESIGN.md`](DESIGN.md) 寫下了這個網站的顏色、字型、元件、語氣與該做和不該做的事。用 AI 改介面前，先讓它讀這份檔案。
+
 ## 四個入口
 
 | 頁面 | 給誰 | 做什麼 | 需要後端 |
@@ -219,6 +223,7 @@ kol.html           本人登錄與管理
 admin.html         審核
 experiment.html    比對實驗頁
 make-testsite.html 製作測試站的三張模擬廣告圖
+DESIGN.md          設計規範
 css/style.css      樣式與列印版面
 js/app.js          流程控制、自拍與證件驗證、搜尋畫面、存證、文件顯示
 js/matching.js     四層比對與改動區域標示
