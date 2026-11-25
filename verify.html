@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>查證代言 · 尋影 TraceBack</title>
   <meta name="description" content="看到名人、老師、醫師推薦的廣告或投資群組？上傳截圖，確認是不是本人。">
+  <meta name="color-scheme" content="light dark">
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -23,12 +25,24 @@
     <a class="brand" href="index.html" aria-label="尋影 TraceBack，回到首頁">
       <span class="logo"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span>
       <strong>尋影 TraceBack</strong>
-      <span class="tag">查證代言</span>
     </a>
-    <button type="button" class="help-btn" id="help-open"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>需要協助</button>
+    <nav class="site-nav" aria-label="主選單">
+      <a href="index.html"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>被冒用了</a>
+      <a href="verify.html" aria-current="page"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>查證代言</a>
+      <a href="kol.html"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>本人登錄</a>
+    </nav>
+    <div class="top-actions">
+      <button type="button" class="help-btn" id="help-open"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><span class="btn-label">需要協助</span></button>
+      <button type="button" class="icon-btn" id="theme-btn" aria-label="切換深色或淺色外觀">
+        <svg class="icon moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>
+        <svg class="icon sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
+      </button>
+    </div>
   </header>
 
   <p class="privacy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span>截圖先在你的裝置上轉成臉部特徵數值，送出比對的是數值，不是截圖。只有你按下「交給本人確認」時，才會上傳縮小後的截圖。</span></p>
+
+  <figure class="journey" id="journey"></figure>
 
   <div class="status" id="status" role="status" aria-live="polite" hidden></div>
 
@@ -40,7 +54,8 @@
     </section>
 
     <section class="view" id="form-view">
-      <h1>這個人真的是本人嗎？</h1>
+      <p class="eyebrow">TraceBack · 查證代言</p>
+      <h1 class="after-eyebrow">這個人真的是本人嗎？</h1>
       <p class="lead">看到某位老師、醫師或網紅推薦投資、邀你進群組，或私訊你？在加入群組或匯款之前，先上傳截圖查一下。</p>
 
       <p class="callout" id="no-backend" hidden>這個網站還沒連上後端，目前無法查證。部署方式見 <code>backend/README.md</code>。</p>
@@ -96,6 +111,16 @@
         <h2>其他線索</h2>
         <p class="note">下面是輔助訊號，不能單獨證明是不是假的。</p>
         <ul class="findings" id="signals"></ul>
+        <div class="row"><button type="button" class="small" id="ocr-run">讀出圖上的文字，找詐騙話術（約 5 MB）</button></div>
+        <p class="result-line" id="ocr-result"></p>
+        <ul class="findings" id="ocr-hits"></ul>
+        <details class="more" id="ocr-text-wrap" hidden>
+          <summary>看讀出來的文字</summary>
+          <div class="inner">
+            <p class="note">文字辨識在你的瀏覽器裡執行，圖片不會送出去。辨識可能漏字或認錯字。</p>
+            <pre class="ocr-text" id="ocr-text"></pre>
+          </div>
+        </details>
         <div class="row"><button type="button" class="small" id="ai-run">再用 AI 生成偵測模型看看（約 87 MB）</button></div>
         <p class="result-line" id="ai-result"></p>
       </div>

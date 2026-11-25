@@ -101,7 +101,7 @@ function evidenceLines(c) {
   if (c.suspect) out.push(`可疑影像檔案 SHA-256：${c.suspect.sha256}`);
   if (c.match) out.push(`比對結果：${c.match.summary}`);
   const s = c.signals || {};
-  const other = [s.provenance, s.swap, s.ai].filter(Boolean);
+  const other = [s.provenance, s.swap, s.scamText, s.ai].filter(Boolean);
   if (other.length) out.push(`其他線索（輔助，非判定）：${other.join('；')}`);
   return out;
 }

@@ -6,6 +6,8 @@ import { explainEdit } from './edits.js';
 import { faceParts, partDistances, swapSignal } from './faceparts.js';
 import { readProvenance, describeProvenance } from './provenance.js';
 import { renderSignals, setupAiButton } from './signals.js';
+import { setupScamTextButton, resetScamText, scamTextSummary } from './scamtext.js';
+import { mountJourney, STAGE_OF } from './journey.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) =>
@@ -45,12 +47,21 @@ const state = {
 
 // ---------- 共用 ----------
 
+let journey = null;
+
 function show(view) {
   if (view !== 'bind') stopCamera();
   for (const el of document.querySelectorAll('.view')) el.hidden = el.id !== view;
   const flow = FLOWS[state.path];
   const idx = flow.indexOf(view);
   $('progress').hidden = idx < 0;
+  // 旅程場景：涉及未滿 18 歲或不雅影像的情況不顯示，避免輕鬆的畫面讓人不舒服
+  const showJourney = idx >= 0 && !['intimate', 'minor'].includes(selected('scenario'));
+  $('journey').hidden = !showJourney;
+  if (showJourney) {
+    if (!journey) journey = mountJourney($('journey'));
+    journey.go(STAGE_OF[view]);
+  } else if (journey) journey.hide();
   if (idx >= 0) {
     $('progress-count').textContent = `第 ${idx + 1} 步，共 ${flow.length} 步`;
     $('progress-name').textContent = STEP_NAMES[view];
@@ -665,6 +676,7 @@ async function runCompare() {
     state.results.sort((a, b) => b.rank - a.rank);
     state.best = state.results[0];
     state.aiScore = null;
+    state.scamText = null;
     setStatus('正在檢查其他線索');
     state.provenance = await readProvenance(state.suspectFile);
     state.swap = await checkSwap(state.best);
@@ -713,6 +725,10 @@ function figure(canvas, title, caption, blurred) {
   return fig;
 }
 
+function ocrEls() {
+  return { button: $('ocr-run'), line: $('ocr-result'), hits: $('ocr-hits'), textWrap: $('ocr-text-wrap'), text: $('ocr-text') };
+}
+
 function renderResult() {
   const b = state.best;
   const blur = selected('scenario') === 'intimate';
@@ -731,6 +747,7 @@ function renderResult() {
   renderSignals($('signals'), { provenance: state.provenance, swap: state.swap });
   $('ai-run').disabled = false;
   setLine('ai-result', '', '');
+  resetScamText(ocrEls());
 
   const box = $('compare');
   box.appendChild(figure(copyCanvas(b.ref.canvas), `你的第 ${b.index + 1} 張照片`, b.ref.name, false));
@@ -841,6 +858,8 @@ async function buildEvidence() {
     ev.signals = {
       provenance: prov && prov.level !== 'low' ? prov.title : null,
       swap: state.swap && state.swap.found ? '可能經過換臉（五官像本人、臉型不像）' : null,
+      scamText: scamTextSummary(state.scamText),
+      scamWords: state.scamText && state.scamText.hits.length ? state.scamText.hits.map((h) => ({ label: h.label, words: h.words })) : null,
       ai: state.aiScore === undefined || state.aiScore === null || state.aiScore < 0.5 ? null : `疑似 AI 生成分數 ${Math.round(state.aiScore * 100)}/100（偵測模型，僅供參考）`,
       swapNumbers: state.swap ? { inner: Number(state.swap.inner.toFixed(4)), outer: Number(state.swap.outer.toFixed(4)) } : null,
     };
@@ -870,7 +889,7 @@ function evidenceRows(ev) {
     rows.push(['你的照片的數位指紋（SHA-256）', ev.match.referenceSha256]);
     rows.push(['比對結果', ev.match.summary]);
     const s = ev.signals || {};
-    const other = [s.provenance, s.swap, s.ai].filter(Boolean).join('；');
+    const other = [s.provenance, s.swap, s.scamText, s.ai].filter(Boolean).join('；');
     if (other) rows.push(['其他線索（輔助，非判定）', other]);
   } else if (ev.minor) {
     rows.push(['影像', '依設計不收取、不保存']);
@@ -955,6 +974,7 @@ function renderAction() {
       try {
         await navigator.clipboard.writeText(d.text);
         btn.textContent = '已複製';
+        btn.classList.add('copied');
       } catch (_) {
         const range = document.createRange();
         range.selectNodeContents(el.querySelector('pre'));
@@ -963,7 +983,10 @@ function renderAction() {
         sel.addRange(range);
         btn.textContent = '已選取，請按複製';
       }
-      setTimeout(() => (btn.textContent = '複製'), 2500);
+      setTimeout(() => {
+        btn.textContent = '複製';
+        btn.classList.remove('copied');
+      }, 2500);
     });
     box.appendChild(el);
   }
@@ -1020,6 +1043,10 @@ function init() {
   setupAiButton($('ai-run'), $('ai-result'), () => state.suspect?.canvas, (level, score) => {
     state.aiScore = score;
     return level === 'low' ? '這項不會影響比對結果。' : '下一步：存證紀錄會一起記下這個分數，標示為輔助訊號。';
+  });
+  setupScamTextButton(ocrEls(), () => state.suspectFile, (r) => {
+    state.scamText = r;
+    return r.level === 'high' || r.level === 'mid' ? '存證紀錄會一起記下這些字，標示為輔助訊號。' : '';
   });
   renderScenarios();
   renderWeights();

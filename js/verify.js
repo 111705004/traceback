@@ -3,6 +3,8 @@ import * as M from './matching.js';
 import { faceParts } from './faceparts.js';
 import { readProvenance } from './provenance.js';
 import { renderSignals, setupAiButton } from './signals.js';
+import { setupScamTextButton, resetScamText } from './scamtext.js';
+import { mountJourney, VERIFY } from './journey.js';
 import { api, hasBackend, ACTIVITIES, $, esc, icon, setStatus, setLine, oops, setupDrop, sha256File, platformOptions, accountLink, fmtTime } from './api.js';
 
 const state = {
@@ -17,9 +19,17 @@ const state = {
   request: null,
 };
 
+let journey = null;
+// 場景跟著畫面走：填表是「看到」、結果是「查證」、送出回報或看進度是「交給本人」
+function scene(stage) {
+  if (!journey) journey = mountJourney($('journey'), VERIFY);
+  journey.go(stage);
+}
+
 function show(id) {
   $('form-view').hidden = id !== 'form-view';
   $('result-view').hidden = id !== 'result-view';
+  scene(id === 'result-view' ? 1 : 0);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -160,6 +170,7 @@ function renderResult(r) {
   });
   $('ai-run').disabled = false;
   setLine('ai-result', '', '');
+  resetScamText(ocrEls());
 
   // 本人還沒確認過的，才需要回報
   const canReport = r.kol && !r.confirmed;
@@ -167,6 +178,10 @@ function renderResult(r) {
   $('report-consent').checked = false;
   $('report-send').disabled = true;
   setLine('report-result', '', '');
+}
+
+function ocrEls() {
+  return { button: $('ocr-run'), line: $('ocr-result'), hits: $('ocr-hits'), textWrap: $('ocr-text-wrap'), text: $('ocr-text') };
 }
 
 async function runCheck() {
@@ -223,6 +238,7 @@ async function sendReport() {
     });
     const link = `${location.origin}${location.pathname}#r=${r.id}`;
     const line = $('report-result');
+    scene(2);
     line.className = 'result-line ok';
     line.innerHTML = `已交給本人。本人處理後，打開這個連結就能看到結果，請存起來：<br><a href="${esc(link)}">${esc(link)}</a>`;
     const copy = document.createElement('button');
@@ -258,6 +274,7 @@ const STATUS_LOOK = { pending: ['', 'clock'], fake: ['strong', 'alert'], authori
 // 從進度連結（verify.html#r=…）打開時，在頁面最上方顯示結果
 async function showProgress(id) {
   $('progress-view').hidden = false;
+  scene(2);
   const box = $('progress-verdict');
   box.className = 'verdict';
   box.innerHTML = '<div><strong>讀取中</strong></div>';
@@ -304,6 +321,7 @@ function reset() {
 }
 
 function init() {
+  scene(0);
   $('platform').insertAdjacentHTML('beforeend', platformOptions());
   $('activities').innerHTML = Object.entries(ACTIVITIES)
     .map(
@@ -333,6 +351,10 @@ function init() {
       setTimeout(() => $('report-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' }), 600);
       return '下一步：不要加入群組或匯款，把截圖交給本人確認（在下方）。';
     }
+    return '下一步：不要加入群組或匯款，有疑問請打 165。';
+  });
+  setupScamTextButton(ocrEls(), () => state.file, (r) => {
+    if (r.level !== 'high' && r.level !== 'mid') return '請以上面的查證結果為準。';
     return '下一步：不要加入群組或匯款，有疑問請打 165。';
   });
   $('report-consent').addEventListener('change', (e) => ($('report-send').disabled = !e.target.checked));
